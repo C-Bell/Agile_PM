@@ -23,13 +23,13 @@ const auth = require("basic-auth");
 // Authentication Middleware
 const authMiddleware = require("./authMiddleware");
 
-mongoose.connect("mongodb://localhost/myappdatabase");
+mongoose.connect("mongodb://sample123:testsample123@ds229008.mlab.com:29008/heroku_t4vj1r8c/myappdatabase");
 
 // App.use(Create Middleware)
 
 // Session Management code -
 const store = new MongoDBStore({
-  uri: "mongodb://sample123:testsample123@ds229008.mlab.com:29008/heroku_t4vj1r8c",
+  uri: "mongodb://sample123:testsample123@ds229008.mlab.com:29008/heroku_t4vj1r8c/mySessions",
   collection: "mySessions"
 });
 
