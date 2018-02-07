@@ -29,7 +29,7 @@ mongoose.connect("mongodb://localhost/myappdatabase");
 
 // Session Management code -
 const store = new MongoDBStore({
-  uri: "mongodb://localhost:27017/connect_mongodb_session_test",
+  uri: "mongodb://sample123:testsample123@ds229008.mlab.com:29008/heroku_t4vj1r8c",
   collection: "mySessions"
 });
 
