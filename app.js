@@ -14,18 +14,7 @@ const mongoose = require("mongoose");
 const api = require('./routes/api');
 const router = require('./routes/web');
 
-// Custom Mongoose Models -
-const Project = require("./models/project");
-const Deadline = require("./models/deadline");
-const Resource = require("./models/resource");
-const User = require("./models/user");
-const auth = require("basic-auth");
-// Authentication Middleware
-const authMiddleware = require("./authMiddleware");
-
 mongoose.connect("mongodb://localhost/myappdatabase");
-
-// App.use(Create Middleware)
 
 // Session Management code -
 const store = new MongoDBStore({

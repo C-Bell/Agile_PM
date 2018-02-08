@@ -13,32 +13,13 @@ const auth = require("basic-auth");
 const express = require('express');
 const app = express.Router();
 
-/* GET home page. */
-/* API Routes */
-
-app.post("/api/login", (req, res) => {
-  let user = auth(req);
-  console.log(user);
-  User.find({ username: user.name, password: user.pass }, (err, user) => {
-    if (err || user[0] == null) {
-      res.send({
-        errorCode: "Incorrect Password",
-        errorMessage:
-          "We did not recognise that username and password, please try again!"
-      });
-      //throw err;
-    } else {
-      res.send(user);
-    }
-  });
-});
-
 const authenticateUser = async (user, requiredAccess) => {
   return new Promise((resolve, reject) => {
     User.find({ username: user.name, password: user.pass }, (err, found) => {
       if (err || found[0] == null) {
         console.log("Incorrect Password!");
         resolve({
+          responseCode: 401,
           errorCode: "Incorrect Password",
           errorMessage:
             "We did not recognise that username and password, please try again!"
@@ -50,6 +31,7 @@ const authenticateUser = async (user, requiredAccess) => {
         } else {
           console.log("User Found, Incorrect Access!");
           resolve({
+            responseCode: 401,
             errorCode: "Insufficient Privileges",
             errorMessage: "You don't have access to perform this action!"
           });
@@ -58,6 +40,25 @@ const authenticateUser = async (user, requiredAccess) => {
     });
   });
 };
+
+const getProjects = async (objIDArray) => {
+  new Promise(function(resolve, reject) {
+    // let projects = [];
+
+    // console.log(projects);
+    resolve("Hello World");
+  });
+}
+
+/* API Routes */
+
+app.post("/api/login", (req, res) => {
+  let requester = auth(req);
+  let access = "none";
+  let result = await authenticateUser(requester, access);
+
+  res.send(result);
+});
 
 app.post("/users/create", async (req, res) => {
   let requester = auth(req);
@@ -83,7 +84,7 @@ app.post("/users/create", async (req, res) => {
   }
 });
 
-app.post("/users/update", async (req, res) => {
+app.patch("/users/update", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
@@ -96,7 +97,7 @@ app.post("/users/update", async (req, res) => {
     User.findById(id, function (err, userToUpdate) {
       if (err || userToUpdate == null) {
         throw err;
-        res.send({errorCode: "User Not Found", errorMessage: "This is not a valid user ID!"})
+        res.send({responseCode: 204, errorCode: "User Not Found", errorMessage: "This is not a valid user ID!"})
       } else {
         userToUpdate.set(req.body.updateFields);
         userToUpdate.save(function (err, updatedUser) {
@@ -133,7 +134,7 @@ app.post("/deadlines/create", async (req, res) => {
 });
 
 // TODO: Fix the trigger fire on Project
-app.post("/deadlines/update", async (req, res) => {
+app.patch("/deadlines/update", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
@@ -145,7 +146,7 @@ app.post("/deadlines/update", async (req, res) => {
 
     Deadline.findById(id, function (err, deadlineToUpdate) {
       if (err || deadlineToUpdate == null) {
-        res.send({errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
+        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
         throw err;
       } else {
         deadlineToUpdate.set(req.body.updateFields);
@@ -183,7 +184,7 @@ app.post("/resources/create", async (req, res) => {
 });
 
 // TODO: Fix the trigger fire on Project
-app.post("/resources/update", async (req, res) => {
+app.patch("/resources/update", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
@@ -194,7 +195,7 @@ app.post("/resources/update", async (req, res) => {
     console.log("No errorcode")
     Resource.findById(id, function (err, resourceToUpdate) {
       if (err || resourceToUpdate == null) {
-        res.send({errorCode: "Record Not Found", errorMessage: "This is not a valid resource ID!"})
+        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid resource ID!"})
         throw err;
       } else {
         resourceToUpdate.set(req.body.updateFields);
@@ -236,15 +237,6 @@ app.post("/projects/create", async (req, res) => {
     res.send(result);
   }
 });
-
-const getProjects = async (objIDArray) => {
-  new Promise(function(resolve, reject) {
-    // let projects = [];
-
-    // console.log(projects);
-    resolve("Hello World");
-  });
-}
 
 app.get("/projects", async (req, res) => {
   let requester = auth(req);
