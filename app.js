@@ -10,19 +10,19 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const mongoose = require("mongoose");
 
-// Page Imports -
+// Route Imports -
 const api = require('./routes/api');
-const router = require('./routes/web');
+const web = require('./routes/web');
 
 mongoose.connect("mongodb://localhost/myappdatabase");
 
-// Session Management code -
+// Session Management Collection
 const store = new MongoDBStore({
   uri: "mongodb://localhost:27017/connect_mongodb_session_test",
   collection: "mySessions"
 });
 
-// Log errors
+// Store Error Listener
 store.on("error", error => {
   console.log(error);
 });
@@ -57,7 +57,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', api);
+app.use('/', web);
 
 app.use('/api', api);
 

@@ -13,46 +13,12 @@ const auth = require("basic-auth");
 const express = require('express');
 const app = express.Router();
 
-const authenticateUser = async (user, requiredAccess) => {
-  return new Promise((resolve, reject) => {
-    User.find({ username: user.name, password: user.pass }, (err, found) => {
-      if (err || found[0] == null) {
-        console.log("Incorrect Password!");
-        resolve({
-          responseCode: 401,
-          errorCode: "Incorrect Password",
-          errorMessage:
-            "We did not recognise that username and password, please try again!"
-        });
-      } else {
-        if (found[0].type == requiredAccess || requiredAccess == "none") {
-          console.log("User Found, Correct Access!");
-          resolve(found[0]);
-        } else {
-          console.log("User Found, Incorrect Access!");
-          resolve({
-            responseCode: 401,
-            errorCode: "Insufficient Privileges",
-            errorMessage: "You don't have access to perform this action!"
-          });
-        }
-      }
-    });
-  });
-};
-
-const getProjects = async (objIDArray) => {
-  new Promise(function(resolve, reject) {
-    // let projects = [];
-
-    // console.log(projects);
-    resolve("Hello World");
-  });
-}
+const helpers = require('../helpers/apihelper')
+const authenticateUser = helpers.authenticateUser;
 
 /* API Routes */
 
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
   let requester = auth(req);
   let access = "none";
   let result = await authenticateUser(requester, access);
@@ -64,7 +30,7 @@ app.post("/users/create", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
-
+  console.log(result);
   if (!result.errorCode) {
     const newUser = new User({
       name: req.body.first_name + " " + req.body.last_name,

@@ -11,8 +11,10 @@ a {
 h1 {
     color: navy;
     margin-left: 20px;
+    text-align:center;
 }
 
 frame {
   text-align: center;
+  background-color: "pink";
 }
