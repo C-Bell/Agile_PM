@@ -15,6 +15,8 @@ const authMiddleware = require("../authMiddleware");
 const express = require('express');
 const app = express.Router();
 
+const helpers = require('../helpers/apihelper')
+
 app.get("/login", function(req, res) {
   res.render("login");
 });
@@ -24,7 +26,6 @@ app.get("/login", function(req, res) {
 /* An authorised session then allows us to access any routes below the Middleware Layer */
 app.post("/login", (req, res) => {
   console.log(req.body);
-
   User.find(
     { username: req.body.username, password: req.body.password },
     (err, user) => {

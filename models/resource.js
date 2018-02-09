@@ -59,6 +59,48 @@ resourceSchema.post('save', function (doc) {
   });
 });
 
+resourceSchema.post('remove', function (doc) {
+  // console.log('%s - Resource Deleted', doc);
+  // Project.find(doc.project, (err, project) => {
+  //   console.log(project);
+  //   const index = project.resources.indexOf(doc._id);
+  //
+  //   if(index !== -1) {
+  //     project.resources = project.resources.splice(index, 1);
+  //   }
+  //
+  //   project.save((saveError, updatedProject) => {
+  //     if (saveError) {
+  //       throw saveError;
+  //     } else {
+  //       console.log('Project successfully updated!');
+  //       console.log(updatedProject);
+  //     }
+  //   });
+
+    // TODO: Remove from project on delete
+    // if (err) {
+    //   throw err;
+    // } else {
+    //   console.log('Adding resource to ' + project.title);
+    //   // Guard against null vlaue
+    //   if(project.resources == null) {
+    //     project.resources = [];
+    //   }
+    //   project.resources.push(doc._id);
+    //   // TODO: Change to update to prevent multiple trigger fires
+    //   project.save((saveError, updatedProject) => {
+    //     if (saveError) {
+    //       throw saveError;
+    //     } else {
+    //       console.log('Project successfully updated!');
+    //       console.log(updatedProject);
+    //     }
+    //   });
+    // }
+  // });
+});
+
 const Resource = mongoose.model('Resource', resourceSchema);
 
 // make this available to our users in our Node applications

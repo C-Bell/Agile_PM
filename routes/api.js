@@ -18,7 +18,7 @@ const authenticateUser = helpers.authenticateUser;
 
 /* API Routes */
 
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   let requester = auth(req);
   let access = "none";
   let result = await authenticateUser(requester, access);
@@ -77,6 +77,27 @@ app.patch("/users/update", async (req, res) => {
   }
 });
 
+app.delete("/users/delete", async (req, res) => {
+  console.log(req.body);
+  let requester = auth(req);
+  let access = "admin";
+  let result = await authenticateUser(requester, access);
+  let reply = {};
+  if (!result.errorCode) {
+    User.find(req.body, (err, found) => {
+      console.log(`${found.name}'s account was successfully deleted!`);
+      console.log(found[0]);
+      found[0].remove();
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = found;
+      res.send(reply);
+    });
+  } else {
+    res.send(result);
+  }
+});
+
 app.post("/deadlines/create", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
@@ -99,34 +120,38 @@ app.post("/deadlines/create", async (req, res) => {
   }
 });
 
+//
+
 // TODO: Fix the trigger fire on Project
-app.patch("/deadlines/update", async (req, res) => {
+app.delete("/deadlines/delete", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
   let id = req.body.deadlineID
   let updateFields = req.body.updates
+  let reply = {};
+
   console.log(req.body);
 
   if(!result.errorCode) {
 
-    Deadline.findById(id, function (err, deadlineToUpdate) {
-      if (err || deadlineToUpdate == null) {
+    Deadline.find(req.body, function (err, deadlineToDelete) {
+      if (err || deadlineToDelete == null) {
         res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
-        throw err;
       } else {
-        deadlineToUpdate.set(req.body.updateFields);
-        deadlineToUpdate.save(function (saveErr, updatedDeadline) {
-          console.log('Deadline created' + updatedDeadline);
-          if (!saveErr)
-          res.send(updatedDeadline);
-        });
+        deadlineToDelete[0].remove();
+        console.log(`${deadlineToDelete[0]} deadline was successfully deleted!`);
+        reply.executor = requester.name;
+        reply.success = true;
+        reply.record = deadlineToDelete[0];
+        res.send(reply);
       }
-    });
+        });
   } else {
-    return result;
-  }
+      return result;
+    }
 });
+
 
 app.post("/resources/create", async (req, res) => {
   let requester = auth(req);
@@ -175,6 +200,35 @@ app.patch("/resources/update", async (req, res) => {
   } else {
     return result;
   }
+});
+
+app.delete("/resources/delete", async (req, res) => {
+  let requester = auth(req);
+  let access = "admin";
+  let result = await authenticateUser(requester, access);
+  let updateFields = req.body.updates
+  let reply = {};
+
+  console.log(req.body);
+
+  if(!result.errorCode) {
+
+    Resource.find(req.body, function (err, resourceToDelete) {
+      if (err || resourceToDelete[0] == null) {
+        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
+      } else {
+        console.log(`Matching Records: ${resourceToDelete}`)
+        resourceToDelete[0].remove();
+        console.log(`${resourceToDelete[0]} deadline was successfully deleted!`);
+        reply.executor = requester.name;
+        reply.success = true;
+        reply.record = resourceToDelete[0];
+        res.send(reply);
+      }
+        });
+  } else {
+      return result;
+    }
 });
 
 app.post("/projects/create", async (req, res) => {

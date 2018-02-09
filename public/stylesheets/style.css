@@ -15,6 +15,10 @@ h1 {
 }
 
 frame {
-  text-align: center;
   background-color: "pink";
+}
+
+bens {
+  font-color: "pink";
+  font-style: italic;
 }

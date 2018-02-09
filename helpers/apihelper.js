@@ -1,4 +1,10 @@
+const Project = require("../models/project");
+const Deadline = require("../models/deadline");
+const Resource = require("../models/resource");
+const User = require("../models/user");
+
 module.exports = {
+
   authenticateUser: async (user, requiredAccess) => {
   return new Promise((resolve, reject) => {
     console.log(`Looking for: ${user}`);
@@ -26,15 +32,16 @@ module.exports = {
       }
     });
   });
-},
-
-  getProjects: async (objIDArray) => {
-    new Promise(function(resolve, reject) {
-      // let projects = [];
-
-      // console.log(projects);
-      resolve("Hello World");
-    });
-  }
+}
+// },
+//
+//   getProjects: async (objIDArray) => {
+//     new Promise(function(resolve, reject) {
+//       // let projects = [];
+//
+//       // console.log(projects);
+//       resolve("Hello World");
+//     });
+//   }
 
 }
