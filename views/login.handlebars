@@ -1,25 +1,56 @@
-<div class="container">
+<header>
+  <div class="row align-items-center">
+    <div class="col 1">
+      <img width="100px" src="images/PM_Icon.jpg"/>
+    </div>
     <div class="col 6">
-      <div class="row">
-        <div>
-          <label><b>Username</b></label>
-          <input type="text" id="username" placeholder="Enter Username" name="uname" required>
-        </div>
-        <div>
-          <label><b>Password</b></label>
-          <input type="password" id="password" placeholder="Enter Password" name="psw" required>
-        </div>
-        <div>
-          <button id="login">Login</button>
-          <label>
-            <input type="checkbox" checked="checked"> Remember me
-          </label>
+      <h3> Agility PM </h3>
+    </div>
+  </div>
+</header>
+
+<div class="login-padding" style="padding-top: 30%">
+  <div class="container">
+      <div class="col 6">
+        <div class="row card">
+          <div>
+            <label>Username: </label>
+            <input type="text" id="username" placeholder="Enter Username" name="uname" required>
+          </div>
+          <div>
+            <label>Password: </label>
+            <input type="password" id="password" placeholder="Enter Password" name="psw" required>
+          </div>
+          <div>
+            <label>
+              <input type="checkbox" checked="checked"> Remember me
+            </label>
+          </div>
+          <div>
+            <button class="button-blue" id="login">Login</button>
+            <button type="button" class="button-green">Register</button>
+
+          </div>
         </div>
       </div>
+  </div>
+</div>
+
+<footer className="example">
+  <div className="row">
+    <div className="col s3">
+      <a className="white-text hide-on-small-only" />
     </div>
-</div>
-<button type="button" class="cancelbtn">Register</button>
-</div>
+    <div className="col s6">
+      <div>
+        <div className="center-align"/>
+      </div>
+    </div>
+    <div className="col s3">
+      <a className="white-text right hide-on-small-only">By Calum Bell</a>
+    </div>
+  </div>
+</footer>
 
 <script>
 $(document).ready(function() {
@@ -33,7 +64,8 @@ $(document).ready(function() {
         password: $("#password").val()
       },
       success: function(result) {
-        alert(JSON.stringify(result));
+        console.log(JSON.stringify(result));
+        window.location = "/home";
       },
       error: function(result) {
         alert('error');

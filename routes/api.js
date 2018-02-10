@@ -52,16 +52,17 @@ app.post("/users/create", async (req, res) => {
 
 app.patch("/users/update", async (req, res) => {
   let requester = auth(req);
-  let access = "admin";
+  let access = "none";
   let result = await authenticateUser(requester, access);
-  let id = req.body.userID
+  // let id = req.body.userID
   let updateFields = req.body.updates
   console.log(req.body);
 
   if(!result.errorCode) {
 
-    User.findById(id, function (err, userToUpdate) {
+    User.findById(result._id, function (err, userToUpdate) {
       if (err || userToUpdate == null) {
+        console.log('cust error');
         throw err;
         res.send({responseCode: 204, errorCode: "User Not Found", errorMessage: "This is not a valid user ID!"})
       } else {
@@ -258,6 +259,24 @@ app.post("/projects/create", async (req, res) => {
   }
 });
 
+// app.get("/projects", async (req, res) => {
+//   let requester = auth(req);
+//   let access = "none";
+//   console.log(requester);
+//   let result = await authenticateUser(requester, access);
+//   let resultObj = {};
+//   if (!result.error) {
+//     helpers.getProjects(result.projects).then((projects) => {
+//       console.log(projects);
+//     })
+//     // resultObj.numberOfRecords = projects.length;
+//     // resultObj.executor = { "username" : result.username};
+//     // res.send(resultObj);
+//   } else {
+//     res.send(result);
+//   }
+// });
+
 app.get("/projects", async (req, res) => {
   let requester = auth(req);
   let access = "none";
@@ -268,18 +287,24 @@ app.get("/projects", async (req, res) => {
     for(let i = 0; i < result.projects.length; ++i) {
       Project.findById(result.projects[i], function (err, project) {
         // TODO: Return resources and deadlines as projects
-        // console.log(projects.resources)
-        // if(projects.resources != null) {
-        //   if(projects.resources.length != 0) {
+        console.log('Resources:');
+        console.log(project.resources)
+        // if(project.resources != null) {
+        //   if(project.resources.length != 0) {
         //     let resources = [];
-        //     for(let j = 0; j < projects.resources.length; ++i) {
-        //       Resource.findById(projects.resources[j], function (err, resource) {
-        //         resources.push(resource);
-        //         console.log(resource)
+        //     for(let j = 0; j < project.resources.length; ++j) {
+        //       console.log(project.resources[j]);
+        //       Resource.findById(project.resources[j], function (err, resource) {
+        //         console.log('Resource Found! : ' + resource);
+        //         if(resource != null) {
+        //           resources.push(resource);
+        //         }
         //       });
         //     }
-        //     project.resources = resources;
-        //   }
+        //     console.log('ALL resources');
+        //     console.log(resources);
+        //     project.resourceObjs = resources;
+        //
         // }
 
         projects.push(project);

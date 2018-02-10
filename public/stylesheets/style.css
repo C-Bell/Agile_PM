@@ -1,12 +1,15 @@
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
-  color: #00B7FF;
+  color: black; !important
 }
 
+nav-link {
+  padding-left: 8px;
+  padding-right: 8px;
+}
 
 h1 {
     color: navy;
@@ -14,11 +17,66 @@ h1 {
     text-align:center;
 }
 
-frame {
-  background-color: "pink";
+footer {
+  left: 0;
+  bottom: 0;
+  position: fixed;
+  background-color: black;
+  width: 100%;
+  color: white;
 }
 
-bens {
-  font-color: "pink";
-  font-style: italic;
+header {
+  background-color: white;
+  width: 100%;
+  color: black; !important
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+label {
+  color: darkslategrey;
+}
+
+.button-blue {
+  border-radius: 2px;
+    background-color: cadetblue; /* Green */
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.button-green {
+  border-radius: 2px;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+body {
+  height: 100%;
+  background-color: lightslategrey; !important
+}
+
+login-padding {
+  padding-top: 30%;
+}
+
+.card {
+    text-align: center;
+    padding: 5%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }

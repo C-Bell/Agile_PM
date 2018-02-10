@@ -1,1 +1,16 @@
 <h1> HOME </h1>
+
+<script>
+$(document).ready(function() {
+    $.ajax({
+      type: "GET",
+      url: "/user",
+      success: function(result) {
+        alert(JSON.stringify(result));
+      },
+      error: function(result) {
+        alert('error');
+      }
+    });
+  });
+</script>

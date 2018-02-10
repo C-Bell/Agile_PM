@@ -8,6 +8,7 @@ const userSchema = new Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   type: String,
+  team: String,
   created_at: Date,
   updated_at: Date,
   projects: [{ type: Schema.ObjectId, ref: 'Project' }],
