@@ -1,4 +1,52 @@
-<h1> HOME </h1>
+<header>
+  <div class="row align-items-center">
+    <div class="col-2">
+      <img width="100px" src="images/PM_Icon.jpg"/>
+    </div>
+    <div class="col-6">
+      <h3> Agility PM </h3>
+    </div>
+    <div class="col-4 usertitle">
+      <a href="/home">Hi <span id="username"></span></a>
+    </div>
+  </div>
+</header>
+<header class="subheader">
+  <div class="row align-items-center">
+    <div class="col-4">
+    </div>
+    <div class="col-4" style="text-align: center;">
+      <a style="color: white" href="home">Home</a>
+    </div>
+  </div>
+</header/>
+
+<div class="login-padding" style="padding-top: 10%">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3> Project Overview </h3>
+          <div id="List"></div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div>
+      <a/>
+    </div>
+    <div>
+      <div>
+        <div/>
+      </div>
+    </div>
+    <div >
+      <a>By Calum Bell</a>
+    </div>
+  </div>
+</footer>
 
 <script>
 $(document).ready(function() {
@@ -6,11 +54,25 @@ $(document).ready(function() {
       type: "GET",
       url: "/user",
       success: function(result) {
-        alert(JSON.stringify(result));
+        console.log(JSON.stringify(result));
+        document.getElementById("username").innerHTML = result.name;
       },
       error: function(result) {
         alert('error');
       }
     });
+
+    $.ajax({
+      type: "GET",
+      url: "/projects",
+      success: function(result) {
+        console.log(JSON.stringify(result));
+        document.getElementById("List").innerHTML = JSON.stringify(result);
+      },
+      error: function(result) {
+        alert('error');
+      }
+    });
+
   });
 </script>

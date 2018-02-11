@@ -96,6 +96,24 @@ return new Promise((resolve, reject) => {
       }
       // resolve(null);
     });
-  }
+  },
 
+  validate: async (draftObject, type) => {
+    new Promise(function(resolve, reject) {
+      console.log(draftObject);
+      console.log(type);
+      if(type == "user") {
+        if(draftObject.first_name != null
+           && draftObject.last_name != null
+            && draftObject.username != null
+             && draftObject.password != null) {
+               if(password.length < 4) {
+                 resolve({result: false, reason: 'Too few characters in password'});
+               }
+             }
+        resolve({ result: true });
+      }
+      resolve({ result: true });
+  });
+  }
 }

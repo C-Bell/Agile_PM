@@ -12,7 +12,7 @@ const deadlineSchema = new Schema({
     ref: 'Project'
   },
   datetime: Date,
-  title: String,
+  title: { type: String, required: true },
   created_at: Date,
   updated_at: Date,
 });

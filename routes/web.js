@@ -22,6 +22,40 @@ app.get("/login", function(req, res) {
   res.render("login");
 });
 
+app.get("/register", function(req, res) {
+  res.render("register");
+});
+
+app.post("/register", async (req, res) => {
+
+    const newUser = new User({
+      name: req.body.first_name + " " + req.body.last_name,
+      username: req.body.username,
+      password: req.body.password,
+      type: "user",
+      projects: null
+    });
+
+// let isValid = await helpers.validate(newUser, "user");
+// console.log(newUser);
+// console.log('Valid? : '+ isValid);
+//   if(isValid.result) {
+    newUser.save((err, newUser) => {
+      console.log("User saved successfully!");
+      console.log(newUser);
+      console.log(err);
+      // Authorise this session
+      req.session.Authed = true;
+      req.session.userID = newUser._id; // TODO: Vulnerability
+      console.log(req.session);
+
+      res.send(newUser);
+    });
+  // } else {
+  //   res.send(isValid.reason);
+  // }
+});
+
 /* --------------------------- Login POST Request ------------------------- */
 /* This route allows us to get an authorised session if we are a valid user */
 /* An authorised session then allows us to access any routes below the Middleware Layer */
@@ -55,28 +89,32 @@ app.get("/projects", async (req, res) => {
   let result = await authenticateUser(requester, access);
   let projects = [];
   if (!result.error) {
-    for(let i = 0; i < result.projects.length; ++i) {
-      Project.findById(result.projects[i], function (err, project) {
-        // TODO: Return resources and deadlines as projects
-        // console.log(projects.resources)
-        // if(projects.resources != null) {
-        //   if(projects.resources.length != 0) {
-        //     let resources = [];
-        //     for(let j = 0; j < projects.resources.length; ++i) {
-        //       Resource.findById(projects.resources[j], function (err, resource) {
-        //         resources.push(resource);
-        //         console.log(resource)
-        //       });
-        //     }
-        //     project.resources = resources;
-        //   }
-        // }
+    if(result.projects != null && result.projects.length > 0) {
+      for(let i = 0; i < result.projects.length; ++i) {
+        Project.findById(result.projects[i], function (err, project) {
+          // TODO: Return resources and deadlines as projects
+          console.log(projects.resources)
+          if(projects.resources != null) {
+            if(projects.resources.length != 0) {
+              let resources = [];
+              for(let j = 0; j < projects.resources.length; ++i) {
+                Resource.findById(projects.resources[j], function (err, resource) {
+                  resources.push(resource);
+                  console.log(resource)
+                });
+              }
+              project.resources = resources;
+            }
+          }
 
-        projects.push(project);
-        if(i == (result.projects.length-1)) {
-          res.send(projects);
-        }
-      });
+          projects.push(project);
+          if(i == (result.projects.length-1)) {
+            res.send(projects);
+          }
+        });
+      }
+    } else {
+      res.send(404);
     }
   } else {
     res.send(result);

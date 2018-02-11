@@ -15,24 +15,30 @@
   <div class="container">
       <div class="col 6">
         <div class="row card">
-          <div style="padding-right: 3px;">
+          <h3>Registration Form</h3>
+          <h5>We're excited to have you on board!</h5>
+          <div>
+            <label>First Name: </label>
+            <input type="text" id="firstname" placeholder="John" name="fname" required>
+          </div>
+          <div>
+            <label>Last Name: </label>
+            <input type="text" id="lastname" placeholder="Smith" name="lname" required>
+          </div>
+          <div>
             <label>Username: </label>
-            <input type="text" id="username" placeholder="Enter Username" name="uname" required>
+            <input type="text" id="username" placeholder="JSmith94" name="uname" required>
           </div>
           <div>
             <label>Password: </label>
-            <input type="password" id="password" placeholder="Enter Password" name="psw" required>
+            <input type="password" id="password" placeholder="Password" name="psw" required>
           </div>
           <div>
-            <label>
-              <input style="padding:10px;" type="checkbox" checked="checked"> Remember me
-            </label>
+            <button type="button" onclick="window.location = '/login';" class="button-red">Back</button>
+            <button type="button" id="registerUser" class="button-green">Register</button>
           </div>
-          <div>
-            <button class="button-blue" id="login">Login</button>
-            <button type="button" onclick="window.location = '/register';" class="button-green">Register</button>
-
-          </div>
+          <br/>
+          <i>All Fields are Required.</i>
         </div>
       </div>
   </div>
@@ -56,17 +62,19 @@
 
 <script>
 $(document).ready(function() {
-  $("#login").click(function(e) {
+  $("#registerUser").click(function(e) {
     e.preventDefault();
     $.ajax({
       type: "POST",
-      url: "/login",
+      url: "/register",
       data: {
         username: $("#username").val(),
-        password: $("#password").val()
+        password: $("#password").val(),
+        first_name: $("#firstname").val(),
+        last_name: $("#lastname").val()
       },
       success: function(result) {
-        console.log(JSON.stringify(result));
+        alert(JSON.stringify(result));
         window.location = "/home";
       },
       error: function(result) {
@@ -74,6 +82,5 @@ $(document).ready(function() {
       }
     });
   });
-
   });
 </script>

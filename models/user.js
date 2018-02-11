@@ -2,12 +2,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
+
 // create a schema
 const userSchema = new Schema({
-  name: String,
+  name: { type: String },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  type: String,
+  type: { type: String, required: true },
   team: String,
   created_at: Date,
   updated_at: Date,
