@@ -13,6 +13,8 @@ const resourceSchema = new Schema({
   },
   name: { type: String, required: true },
   desc: { type: String, required: true },
+  fromDate: Date,
+  toDate: Date,
   created_at: Date,
   updated_at: Date,
 });

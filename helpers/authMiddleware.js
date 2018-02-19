@@ -3,6 +3,6 @@ module.exports = checkAuth = function (req, res, next) {
       next();
     } else {
       console.log("Not authed");
-      res.redirect('login');
+      res.redirect('/login');
     }
 }

@@ -1,0 +1,306 @@
+<header>
+  <div class="row align-items-center">
+    <div class="col-2">
+      <img width="100px" src="/images/PM_Icon.jpg"/>
+    </div>
+    <div class="col-6">
+      <h3> Agility PM</h3>
+    </div>
+    <div class="col-4 usertitle">
+      <a href="/home">Hi <span id="username">{{user.name}}</span></a>
+    </div>
+  </div>
+</header>
+<header class="subheader">
+  <div class="row align-items-center">
+    <div class="col-4">
+    </div>
+    <div class="col-4" style="text-align: center;">
+      <a style="color: white" href="/home">Home | </a>
+      <a style="color: white" href="/newproject">New Project | </a>
+      <a style="color: white" href="/search">Search</a>
+    </div>
+  </div>
+</header/>
+
+<div class="login-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>{{project.title}}</h3>
+          <div class="container" id=""></div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Deadlines</h3>
+          <div class="container" id="deadlines">
+            {{#each deadlines}}
+              <div class="subcard">
+                <h5>{{this.title}}</h5>
+                <p>{{this.datetime}}</p>
+              </div>
+            {{/each}}
+            <div class="add-box" id="newdeadline">
+              Add New Deadline
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Resources</h3>
+          <div class="container" id="deadlines">
+            {{#each resources}}
+              <div class="subcard">
+                <div class"row">
+                  <div class="col-12">
+                  <h6>{{this.name}}</h6>
+                  <p>{{this.desc}}</p>
+                </div>
+                <div class="col-12">
+                <div>From: {{this.fromDate}}</div>
+                <div>To: {{this.toDate}}</div>
+                </div>
+                </div>
+              </div>
+            {{/each}}
+            <div class="add-box" id="newresource">
+              Add New Resource
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding bottom-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Users</h3>
+          <div class="container" id="deadlines">
+            {{#each users}}
+              <div class="subcard">
+                <div class="row">
+                  <div class="col-9">
+                  <h6>{{this.name}}</h6>
+                  <p>{{this.username}}</p>
+                </div>
+                <div class ="col-3">
+                  <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
+                </div>
+                </div>
+              </div>
+            {{/each}}
+            <!-- {{#if isAdmin}} -->
+            <div class="add-box" id="newuser">
+              Add New User
+            </div>
+            <!-- {{/if}} -->
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div>
+      <a/>
+    </div>
+    <div>
+      <div>
+        <div/>
+      </div>
+    </div>
+    <div >
+      <a>By Calum Bell</a>
+    </div>
+  </div>
+</footer>
+
+<div id="deadlineModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="row align-items-center centre">
+      <div class="container">
+        <h3> New Task </h3>
+            <div class="row centre">
+              <div class="col-12" style="padding-right: 3px;">
+                <label>Title: </label>
+                <input type="text" id="deadlinetitle" placeholder="Sample" name="uname" required>
+              </div>
+              <div class="col-12">
+                <label>Deadline: </label>
+                <input type="date" id="deadlinedate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <button type="button" id="createDeadline" class="button-green">Create</button>
+              </div>
+            </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="resourceModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="row align-items-center centre">
+      <div class="container">
+        <h3> New Resource </h3>
+            <div class="row centre">
+              <div class="col-12" style="padding-right: 3px;">
+                <label>Title: </label>
+                <input type="text" id="resourcetitle" placeholder="Sample" name="uname" required>
+              </div>
+              <div class="col-12">
+                <label>Desc: </label>
+                <input type="text" id="resourcedesc" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <label>Start Date: </label>
+                <input type="date" id="resourcefromdate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <label>End Date: </label>
+                <input type="date" id="resourcetodate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <button type="button" id="createResource" class="button-green">Create</button>
+              </div>
+            </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="userModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h1>New User</h1>
+  </div>
+
+</div>
+
+<script>
+$(document).ready(function() {
+
+var deadlineModal = document.getElementById('deadlineModal');
+var deadlineBtn = document.getElementById("newdeadline");
+var deadlineSpan = document.getElementsByClassName("close")[0];
+
+var resourceModal = document.getElementById('resourceModal');
+var resourceBtn = document.getElementById("newresource");
+var resourceSpan = document.getElementsByClassName("close")[0];
+
+var userModal = document.getElementById('userModal');
+var userBtn = document.getElementById("newuser");
+var userSpan = document.getElementsByClassName("close")[0];
+
+var url = window.location.href;
+var id = url.substring(url.lastIndexOf('/') + 1);
+
+// When the user clicks on the button, open the modal
+userBtn.onclick = function() {
+    userModal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+userSpan.onclick = function() {
+    userModal.style.display = "none";
+}
+// When the user clicks on the button, open the modal
+deadlineBtn.onclick = function() {
+    deadlineModal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+deadlineSpan.onclick = function() {
+    deadlineModal.style.display = "none";
+}
+
+resourceBtn.onclick = function() {
+    resourceModal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+resourceSpan.onclick = function() {
+    resourceModal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == resourceModal || event.target == deadlineModal || event.target == userModal) {
+        deadlineModal.style.display = "none";
+        resourceModal.style.display = "none";
+        userModal.style.display = "none";
+    }
+}
+
+/*                Event Listeners           */
+
+// Create a new Deadline as part of this project -
+  $("#createDeadline").click(function(e) {
+      e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: "/deadlines/create",
+        data: {
+          title: $("#deadlinetitle").val(),
+          datetime: $("#deadlinedate").val(),
+          project: id,
+        },
+        success: function(result) {
+          window.location.reload();
+          console.log(JSON.stringify(result));
+        },
+        error: function(result) {
+          alert('Oops! There was a problem!');
+        }
+      });
+    });
+
+    // Create a new Resource as part of this project -
+    $("#createResource").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/resources/create",
+          data: {
+            name: $("#resourcetitle").val(),
+            desc: $("#resourcedesc").val(),
+            fromDate: $("#resourcefromdate").val(),
+            toDate: $("#resourcetodate").val(),
+            project: id,
+          },
+          success: function(result) {
+            window.location.reload();
+            console.log(JSON.stringify(result));
+          },
+          error: function(result) {
+            alert('Oops! There was a problem!');
+          }
+        });
+      });
+  });
+</script>

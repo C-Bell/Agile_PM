@@ -7,9 +7,11 @@ const Schema = mongoose.Schema;
 // create a schema
 const userSchema = new Schema({
   name: { type: String },
+  desc: { type: String },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   type: { type: String, required: true },
+  imgUrl: {type: String},
   team: String,
   created_at: Date,
   updated_at: Date,

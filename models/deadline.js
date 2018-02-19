@@ -38,22 +38,25 @@ deadlineSchema.post('save', function (doc) {
     if (err) {
       throw err;
     } else {
-      console.log('Found ' + project);
-      // Guard against null vlaue
-      if(project.deadlines == null) {
-        console.log('setting null to []');
-        project.deadlines = [];
-      }
-      project.deadlines.push(doc._id);
-      // TODO: Change to update to prevent multiple trigger fires
-      project.save((saveError, updatedProject) => {
-        if (saveError) {
-          throw saveError;
-        } else {
-          console.log('Project successfully updated!');
-          console.log(updatedProject);
+      if(project != null) {
+        console.log('Found ' + project);
+        // Guard against null vlaue
+        if(project.deadlines == null) {
+          console.log('setting null to []');
+          project.deadlines = [];
         }
-      });
+        project.deadlines.push(doc._id);
+        // TODO: Change to update to prevent multiple trigger fires
+        project.save((saveError, updatedProject) => {
+          if (saveError) {
+            throw saveError;
+          } else {
+            console.log('Project successfully updated!');
+            console.log(updatedProject);
+          }
+        });
+      }
+
     }
   });
 });

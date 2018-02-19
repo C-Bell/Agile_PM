@@ -16,7 +16,8 @@
     <div class="col-4">
     </div>
     <div class="col-4" style="text-align: center;">
-      <a style="color: white" href="home">Home</a>
+      <a style="color: white" href="/newprojects">New Projects |</a>
+      <a style="color: white" href="/newprojects">Search</a>
     </div>
   </div>
 </header/>
@@ -26,7 +27,7 @@
       <div>
         <div class="row card align-items-center">
           <h3> Project Overview </h3>
-          <div id="List"></div>
+          <div class="container" id="List"></div>
         </div>
       </div>
   </div>
@@ -66,8 +67,23 @@ $(document).ready(function() {
       type: "GET",
       url: "/projects",
       success: function(result) {
-        console.log(JSON.stringify(result));
-        document.getElementById("List").innerHTML = JSON.stringify(result);
+        let renderString = "";
+        console.log(result);
+        if(result)
+        for(let i = 0; i < result.length; ++i) {
+          let noResources = "None";
+          let noTasks = "None";
+          let projectURL = '/projects/' + result[i].record._id;
+          if(result[i].resourceObjects != null) {
+            noResources = result[i].resourceObjects.length;
+          }
+          if(result[i].deadlineObjects != null) {
+            noTasks = result[i].deadlineObjects.length;
+          }
+          renderString += `<a href='${projectURL}'><div class="subcard"><h4>${result[i].record.title}</h4><span>Number of Resources: ${noResources}</span></br><span>Number of Deadlines: ${noTasks}</span></div></a>`;
+        }
+        renderString += "";
+        document.getElementById("List").innerHTML = renderString;
       },
       error: function(result) {
         alert('error');

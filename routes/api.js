@@ -162,8 +162,10 @@ app.post("/resources/create", async (req, res) => {
   if (!result.errorCode) {
     const newResource = new Resource({
       project: req.body.projectid,
-      datetime: req.body.datetime,
-      title: req.body.title
+      name: req.body.name,
+      desc: req.body.desc,
+      fromDate: req.body.fromDate,
+      toDate: req.body.toDate
     });
 
     newResource.save((err, resource) => {

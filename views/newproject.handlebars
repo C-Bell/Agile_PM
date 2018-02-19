@@ -1,0 +1,97 @@
+<header>
+  <div class="row align-items-center">
+    <div class="col-2">
+      <img width="100px" src="images/PM_Icon.jpg"/>
+    </div>
+    <div class="col-6">
+      <h3> Agility PM </h3>
+    </div>
+    <div class="col-4 usertitle">
+      <a href="/home">Hi <span id="username">{{user.name}}</span></a>
+    </div>
+  </div>
+</header>
+<header class="subheader">
+  <div class="row align-items-center">
+    <div class="col-4">
+    </div>
+    <div class="col-4" style="text-align: center;">
+      <a style="color: white" href="/home">Home | </a>
+  </div>
+</header/>
+
+<div class="login-padding" style="padding-top: 10%">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3> New Project </h3>
+          <div class="container">
+                <div class="row centre">
+                  <div class="col-12" style="padding-right: 3px;">
+                    <label>Title: </label>
+                    <input type="text" id="title" placeholder="Sample" name="uname" required>
+                  </div>
+                  <div class="col-12">
+                    <label>Description: </label>
+                    <input type="text" id="desc" placeholder="" name="desc" required>
+                  </div>
+                  <div class="col-12">
+                    <label>Start Date: </label>
+                    <input type="text" id="startDate" placeholder="" name="start" required>
+                  </div>
+                  <div class="col-12">
+                    <label>End Date: </label>
+                    <input type="text" id="endDate" placeholder="" name="end" required>
+                  </div>
+                  <div class="col-12">
+                    <button type="button" onclick="window.location = '/home';" class="button-red">Back</button>
+                    <button type="button" id="create" class="button-green">Create</button>
+                  </div>
+                </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div>
+      <a/>
+    </div>
+    <div>
+      <div>
+        <div/>
+      </div>
+    </div>
+    <div >
+      <a>By Calum Bell</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+$(document).ready(function() {
+
+  $("#create").click(function(e) {
+      e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: "/projects/new",
+        data: {
+          title: $("#title").val(),
+          desc: $("#desc").val(),
+          startDate: $("#startDate").val(),
+          endDate: $("#endDate").val()
+        },
+        success: function(result) {
+          console.log(JSON.stringify(result));
+          window.location = "/home";
+        },
+        error: function(result) {
+          alert('error');
+        }
+      });
+    });
+  });
+</script>
