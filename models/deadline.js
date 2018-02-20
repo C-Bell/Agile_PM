@@ -1,4 +1,3 @@
-// grab the things we need
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -13,6 +12,8 @@ const deadlineSchema = new Schema({
   },
   datetime: Date,
   title: { type: String, required: true },
+  status: { type: String, default: "todo" },
+  assignee: { type: Schema.ObjectId, ref: 'User' },
   created_at: Date,
   updated_at: Date,
 });

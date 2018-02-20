@@ -37,6 +37,19 @@ const fetchProject = async projectID => {
   });
 };
 
+// fetchAllUsers - Fetches all users associated with a
+// project object
+// Input - ID ( Project )
+// Output - Array of User Objects
+const fetchAllUsers = async () => {
+  new Promise((resolve, reject) => {
+    User.find({}, async (err, users) => {
+      console.log(`${users.length} users found!`);
+      resolve(users);
+    })
+  });
+};
+
 // fetchProjectUsers - Fetches all users associated with a
 // project object
 // Input - ID ( Project )
@@ -95,8 +108,10 @@ const fetchDeadline = async deadlineID => {
   });
 };
 
+// Public functions
 module.exports = {
-  /* Authentication Method (API)
+
+/* Authentication Method (API)
 Input:
 * User Object (Username and Password decrypted from basic auth header)
 * requiredAccess - Compares the current users access level with that required to
@@ -226,5 +241,85 @@ Output:
     project.users = await fetchProjectUsers(project.record._id);
 
     return project;
-  }
-};
+  },
+
+  // TODO: Make Synchronous
+  getUserList: async () => {
+    const userList = await fetchAllUsers();
+    console.log('Returning to main function : ' + userList.length);
+    return userList;
+  },
+
+
+// TODO: Complete
+ addProjectToUser: async (userID, projectID) => {
+   return new Promise((resolve, reject) => {
+     console.log(`Looking for: ${userID}`);
+     User.find({ _id: userID }, (err, found) => {
+       if (err || found[0] == null) {
+         console.log("Incorrect Password!");
+         resolve({
+           responseCode: 404, // 404 Response Code - User not found
+           errorCode: "Incorrect Password",
+           // User friendly message
+           errorMessage:
+             "We did not recognise that username and password, please try again!"
+         });
+       } else {
+         console.log('Found: ' + found);
+         if (found[0].projects == null) {
+           found[0].projects = [];
+         }
+           console.log("User Found, Adding new Project!");
+           console.log(found[0].projects);
+           found[0].projects.push(projectID);
+           console.log(found[0].projects);
+           found[0].save(function (err, updatedProject) {
+             if (err) {
+               resolve(err);
+             }
+             resolve(updatedProject);
+           });
+       }
+     });
+   });
+ },
+
+ // TODO: Complete
+  // addUserToProject: async (userID, projectID) => {
+  //   return new Promise((resolve, reject) => {
+  //     console.log(`Looking for: ${projectID}`);
+  //           Project.findById(result.projects[i], function (err, project) {
+  //             if (err || found[0] == null) {
+  //               console.log("Project Not Found!");
+  //               resolve({
+  //                 responseCode: 404, // 404 Response Code - User not found
+  //                 errorCode: "Project Not Found",
+  //                 // User friendly message
+  //                 errorMessage:
+  //                   "We cannot find that project, please try again!"
+  //               });
+  //             } else {
+  //               let thisProject = found[0];
+  //               thisProject.
+  //             }
+  //           });
+  //         });
+  //       }
+      }
+
+//       Project.findById(result.projects[i], function (err, project) {
+//         // TODO: Return resources and deadlines as projects
+//         console.log('Resources:');
+//         console.log(project.resources)
+//         // if(project.resources != null) {
+//         //   if(project.resources.length != 0) {
+//         //     let resources = [];
+//         //     for(let j = 0; j < project.resources.length; ++j) {
+//         //       console.log(project.resources[j]);
+//         //       Resource.findById(project.resources[j], function (err, resource) {
+//         //         console.log('Resource Found! : ' + resource);
+//         //         if(resource != null) {
+//         //           resources.push(resource);
+//         //         }
+//         //       });

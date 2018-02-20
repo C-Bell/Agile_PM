@@ -194,3 +194,7 @@ body {
     text-decoration: none;
     cursor: pointer;
 }
+
+.center {
+    text-align:center;
+}

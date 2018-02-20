@@ -1,4 +1,3 @@
-// grab the things we need
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 

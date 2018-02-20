@@ -22,9 +22,32 @@ app.post("/login", async (req, res) => {
   let requester = auth(req);
   let access = "none";
   let result = await authenticateUser(requester, access);
-
+  console.log(result);
+  if(result.errorCode) {
+    res.status(404);
+  } else {
+    res.status(200);
+  }
   res.send(result);
 });
+
+// app.get("/users", async (req, res) => {
+//   let requester = auth(req);
+//   let access = "none";
+//   let result = await authenticateUser(requester, access);
+//   console.log(result);
+//   if (!result.errorCode) {
+//   User.find({}, function (err, users) {
+//           res.send(users);
+//       });
+//   });
+//   } else {
+//     res.send(result);
+//   }
+// });
+/*---------------------------------------------*/
+/*                  USER ROUTES                */
+/*---------------------------------------------*/
 
 app.post("/users/create", async (req, res) => {
   let requester = auth(req);
@@ -99,6 +122,10 @@ app.delete("/users/delete", async (req, res) => {
   }
 });
 
+/*---------------------------------------------*/
+/*               DEADLINE ROUTES               */
+/*---------------------------------------------*/
+
 app.post("/deadlines/create", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
@@ -109,7 +136,8 @@ app.post("/deadlines/create", async (req, res) => {
     const newDeadline = new Deadline({
       project: req.body.projectid,
       datetime: req.body.datetime,
-      title: req.body.title
+      title: req.body.title,
+      assignee: req.body.assignee,
     });
 
     newDeadline.save((err, deadline) => {
@@ -153,6 +181,9 @@ app.delete("/deadlines/delete", async (req, res) => {
     }
 });
 
+/*---------------------------------------------*/
+/*               RESOURCE ROUTES               */
+/*---------------------------------------------*/
 
 app.post("/resources/create", async (req, res) => {
   let requester = auth(req);
@@ -234,12 +265,18 @@ app.delete("/resources/delete", async (req, res) => {
     }
 });
 
+/*---------------------------------------------*/
+/*                 PROJECT ROUTES              */
+/*---------------------------------------------*/
+
 app.post("/projects/create", async (req, res) => {
   let requester = auth(req);
   let access = "admin";
   let result = await authenticateUser(requester, access);
 
   if (!result.error) {
+
+    // Build our object in accordance to the Schema
     let projectSchema = new Project({
       owner: result._id,
       title: req.body.title,
@@ -249,6 +286,7 @@ app.post("/projects/create", async (req, res) => {
       resources: null
     });
 
+    // Save our object in accordance to the Schema
     projectSchema.save((err, newProject) => {
       if (err) throw err;
       console.log("Project saved successfully!");
@@ -279,48 +317,48 @@ app.post("/projects/create", async (req, res) => {
 //   }
 // });
 
-app.get("/projects", async (req, res) => {
-  let requester = auth(req);
-  let access = "none";
-  let result = await authenticateUser(requester, access);
-  let projects = [];
-  let resultObj = {};
-  if (!result.error) {
-    for(let i = 0; i < result.projects.length; ++i) {
-      Project.findById(result.projects[i], function (err, project) {
-        // TODO: Return resources and deadlines as projects
-        console.log('Resources:');
-        console.log(project.resources)
-        // if(project.resources != null) {
-        //   if(project.resources.length != 0) {
-        //     let resources = [];
-        //     for(let j = 0; j < project.resources.length; ++j) {
-        //       console.log(project.resources[j]);
-        //       Resource.findById(project.resources[j], function (err, resource) {
-        //         console.log('Resource Found! : ' + resource);
-        //         if(resource != null) {
-        //           resources.push(resource);
-        //         }
-        //       });
-        //     }
-        //     console.log('ALL resources');
-        //     console.log(resources);
-        //     project.resourceObjs = resources;
-        //
-        // }
-
-        projects.push(project);
-        if(i == (result.projects.length-1)) {
-          resultObj.user = {"id" : result._id, "username" : result.username};
-          resultObj.numberOfResults = projects.length;
-          resultObj.projects = projects;
-          res.send(resultObj);
-        }
-      });
-    }
-  } else {
-    res.send(result);
-  }
-});
+// app.get("/projects", async (req, res) => {
+//   let requester = auth(req);
+//   let access = "none";
+//   let result = await authenticateUser(requester, access);
+//   let projects = [];
+//   let resultObj = {};
+//   if (!result.error) {
+//     for(let i = 0; i < result.projects.length; ++i) {
+//       Project.findById(result.projects[i], function (err, project) {
+//         // TODO: Return resources and deadlines as projects
+//         console.log('Resources:');
+//         console.log(project.resources)
+//         // if(project.resources != null) {
+//         //   if(project.resources.length != 0) {
+//         //     let resources = [];
+//         //     for(let j = 0; j < project.resources.length; ++j) {
+//         //       console.log(project.resources[j]);
+//         //       Resource.findById(project.resources[j], function (err, resource) {
+//         //         console.log('Resource Found! : ' + resource);
+//         //         if(resource != null) {
+//         //           resources.push(resource);
+//         //         }
+//         //       });
+//         //     }
+//         //     console.log('ALL resources');
+//         //     console.log(resources);
+//         //     project.resourceObjs = resources;
+//         //
+//         // }
+//
+//         projects.push(project);
+//         if(i == (result.projects.length-1)) {
+//           resultObj.user = {"id" : result._id, "username" : result.username};
+//           resultObj.numberOfResults = projects.length;
+//           resultObj.projects = projects;
+//           res.send(resultObj);
+//         }
+//       });
+//     }
+//   } else {
+//     res.send(result);
+//   }
+// });
 
 module.exports = app;

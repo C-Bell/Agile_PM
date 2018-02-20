@@ -63,11 +63,13 @@ app.post("/register", async (req, res) => {
 /* This route allows us to get an authorised session if we are a valid user */
 /* An authorised session then allows us to access any routes below the Middleware Layer */
 app.post("/login", (req, res) => {
-  //console.log(req);
+  console.log('Web POST Login called.')
+  console.log(req.body);
   User.find(
     { username: req.body.username, password: req.body.password },
     (err, user) => {
       if (err || user[0] == null) {
+        res.status(404);
         res.send({
           responseCode: 401,
           errorCode: "Incorrect Password",
@@ -80,7 +82,7 @@ app.post("/login", (req, res) => {
         req.session.userID = user[0]._id; // TODO: Vulnerability
         console.log(req.session);
         // Send an OK status code for: Successfully executed
-        res.send(200);
+        res.sendStatus(200);
       }
     }
   );
@@ -92,6 +94,7 @@ app.post("/login", (req, res) => {
 /* Everything below this line requires an authorised session to access */
 app.use(authMiddleware);
 /* ------------------------------------------------------------------- */
+
 
 app.get("/projects", async (req, res) => {
   let requester = req.session;
@@ -119,27 +122,59 @@ app.get("/user", async (req, res) => {
   res.send(result);
 });
 
+app.delete("/delete", async (req, res) => {
+  let requester = req.session;
+  let access = "admin";
+  let result = await authenticateUser(requester, access);
+  delete result.password;
+  if(!result.errorCode) {
+    Deadline.findOneAndRemove({_id: req.body.id}, function(err) {
+      if(err) {
+        console.log(err);
+      } else {
+        console.log(`Deadline ${req.body.id} deleted.`)
+      }
+    });
+
+    Resource.findOneAndRemove({_id: req.body.id}, function(err){
+      if(err) {
+        console.log(err);
+      } else {
+        console.log(`Deadline ${req.body.id} deleted.`)
+      }
+    });
+
+  } else {
+    res.send(result);
+  }
+});
+
 app.get('/projects/:pID', async (req, res) => {
   let requester = req.session;
   let access = "none";
   let result = await authenticateUser(requester, access);
+  // let userList = await helpers.getUserList();
   let projectRecord = {};
   if (!result.error) {
         projectRecord =  await helpers.getProject([req.params.pID]);
       console.log('RENDERING RESULT');
-      console.log(projectRecord._id);
+
       if(projectRecord != null) {
+        User.find({}, (err, userList) => {
+        console.log(userList);
         res.render('project', {
           project : projectRecord.record,
           deadlines : projectRecord.deadlineObjects,
           resources : projectRecord.resourceObjects,
           users : projectRecord.users,
           user: result,
+          allUsers: userList,
           helpers: { // TODO
-            isAdmin: function (result) { if(result.type == "admin") {return true;} else {return false;} },
+            isAdmin: function (result) { if(result.type == null) {return true;} else {return false;} },
             isUserOrAbove: function (result) { if(result.type == "admin" || result.type == "user") {return true;} else {return false;} }
           }
       });
+    });
       } else {
         res.send(404);
       }
@@ -177,6 +212,23 @@ app.post("/projects/new", async (req, res) => {
   }
 });
 
+app.post("/projects/addUser", async (req, res) => {
+  let requester = req.session
+  let access = "none";
+  let result = await authenticateUser(requester, access);
+  console.log(`Adding ${req.body.userId} to ${req.body.projectId}`);
+  console.log(req.body);
+
+  if (!result.error) { // Is this a valid user?
+    let success = await helpers.addProjectToUser(req.body.userId, req.body.projectId);
+    // success = await helpers.addUserToProject(req.body.userId, req.body.projectId);
+    console.log(success);
+    res.send(success);
+  } else { // Send result which is a Error JSON object
+    res.send(result);
+  }
+});
+
 app.post("/deadlines/create", async (req, res) => {
   let requester = req.session;
   let access = "none";
@@ -188,7 +240,8 @@ app.post("/deadlines/create", async (req, res) => {
     const newDeadline = new Deadline({
       project: req.body.project,
       datetime: req.body.datetime,
-      title: req.body.title
+      title: req.body.title,
+      assignee: req.body.assignee,
     });
 
     console.log(newDeadline);
@@ -276,6 +329,16 @@ app.get("/", async (req, res) => {
   res.render("home", {
     user: result
   });
+});
+
+app.get("/logout", async (req, res) => {
+  let requester = req.session;
+  let access = "none";
+  let result = await authenticateUser(requester, access);
+  // Set our session authed state to false to prevent further access
+  req.session.Authed = false;
+  // Render the login page for the user
+  res.render("login");
 });
 
 app.get("/newprojects", async (req, res) => {

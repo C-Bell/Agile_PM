@@ -1,10 +1,10 @@
 <header>
   <div class="row align-items-center">
     <div class="col-2">
-      <img width="100px" src="/images/PM_Icon.jpg"/>
+      <img width="100px" src="images/PM_Icon.jpg"/>
     </div>
     <div class="col-6">
-      <h3> Agility PM</h3>
+      <h3> Agility PM </h3>
     </div>
     <div class="col-4 usertitle">
       <a href="/home">Hi <span id="username">{{user.name}}</span></a>
@@ -17,7 +17,7 @@
     </div>
     <div class="col-4" style="text-align: center;">
       <a style="color: white" href="/home">Home | </a>
-      <a style="color: white" href="/newproject">New Project | </a>
+      <a style="color: white" href="/newprojects">New Projects | </a>
       <a style="color: white" href="/search">Search</a>
     </div>
   </div>
@@ -41,9 +41,16 @@
           <h3>Deadlines</h3>
           <div class="container" id="deadlines">
             {{#each deadlines}}
-              <div class="subcard">
-                <h5>{{this.title}}</h5>
-                <p>{{this.datetime}}</p>
+              <div class="subcard" data="deadline" id="{{this._id}}">
+                <div class="row">
+                  <div class="col-8">
+                    <h5>{{this.title}} - {{this.status}}</h5>
+                    <p>{{this.datetime}}</p>
+                  </div>
+                  <div class="col-4">
+                    <span id="{{this._id}}" class="close">&times;</span>
+                  </div>
+                </div>
               </div>
             {{/each}}
             <div class="add-box" id="newdeadline">
@@ -62,11 +69,14 @@
           <h3>Resources</h3>
           <div class="container" id="deadlines">
             {{#each resources}}
-              <div class="subcard">
-                <div class"row">
-                  <div class="col-12">
+              <div class="subcard" data="resource" id="{{this._id}}">
+                <div class="row">
+                  <div class="col-8">
                   <h6>{{this.name}}</h6>
                   <p>{{this.desc}}</p>
+                </div>
+                <div class="col-4">
+                  <span id="{{this._id}}" class="close">&times;</span>
                 </div>
                 <div class="col-12">
                 <div>From: {{this.fromDate}}</div>
@@ -103,11 +113,9 @@
                 </div>
               </div>
             {{/each}}
-            <!-- {{#if isAdmin}} -->
             <div class="add-box" id="newuser">
               Add New User
             </div>
-            <!-- {{/if}} -->
           </div>
         </div>
       </div>
@@ -198,6 +206,20 @@
   <div class="modal-content">
     <span class="close">&times;</span>
     <h1>New User</h1>
+    {{#each allUsers}}
+      <div class="subcard">
+        <div class="row">
+          <div class="col-9">
+          <h6>{{this.name}}</h6>
+          <p>{{this.username}}</p>
+        </div>
+        <div class ="col-3">
+          <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
+          <span id="{{this._id}}" class="add">&#43;</span>
+        </div>
+        </div>
+      </div>
+    {{/each}}
   </div>
 
 </div>
@@ -211,11 +233,11 @@ var deadlineSpan = document.getElementsByClassName("close")[0];
 
 var resourceModal = document.getElementById('resourceModal');
 var resourceBtn = document.getElementById("newresource");
-var resourceSpan = document.getElementsByClassName("close")[0];
+var resourceSpan = document.getElementsByClassName("close")[1];
 
 var userModal = document.getElementById('userModal');
 var userBtn = document.getElementById("newuser");
-var userSpan = document.getElementsByClassName("close")[0];
+var userSpan = document.getElementsByClassName("close")[2];
 
 var url = window.location.href;
 var id = url.substring(url.lastIndexOf('/') + 1);
@@ -302,5 +324,52 @@ window.onclick = function(event) {
           }
         });
       });
+
+// https://www.w3schools.com/js/tryit.asp?filename=tryjs_confirm
+      $(".close").click(function(e) {
+          e.preventDefault();
+          console.log(e);
+          console.log(e.currentTarget.id);
+          if (confirm(`Are you sure you want to delete this item?`)) {
+                $.ajax({
+                  type: "DELETE",
+                  url: "/delete",
+                  data: {
+                    id: e.currentTarget.id
+                  },
+                  success: function(result) {
+                    alert(JSON.stringify(result));
+                    //window.location.reload();
+                  },
+                  error: function(result) {
+                    alert('Oops! There was a problem!');
+                  }
+                });
+          }
+     });
+
+     // https://www.w3schools.com/js/tryit.asp?filename=tryjs_confirm
+           $(".add").click(function(e) {
+               e.preventDefault();
+               console.log(e);
+               console.log(e.currentTarget.id);
+               if (confirm(`Are you sure you want to add this user?`)) {
+                     $.ajax({
+                       type: "POST",
+                       url: "/projects/addUser",
+                       data: {
+                         userId: e.currentTarget.id,
+                         projectId: id
+                       },
+                       success: function(result) {
+                         alert(JSON.stringify(result));
+                       },
+                       error: function(result) {
+                         alert('Oops! There was a problem!');
+                       }
+                     });
+               }
+          });
   });
+
 </script>

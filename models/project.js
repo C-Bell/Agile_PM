@@ -1,4 +1,3 @@
-// grab the things we need
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -41,29 +40,29 @@ projectSchema.pre('save', function (next) {
 // Mongoose is trying to rebind 'this' to the document
 projectSchema.post('save', function (doc) {
   console.log('%s has been saved to the db', doc._id);
-  User.findById(doc.owner, (err, user) => {
-    if (err || user == null) {
-      console.log('Project not found!');
-    } else {
-      console.log('Found ' + user);
-      // Guard against null vlaue
-      if(user.projects == null) {
-        user.projects = [];
-      }
-      if(!user.projects.includes(doc._id)) {
-        user.projects.push(doc._id);
-
-        user.save((saveError, updatedUser) => {
-          if (saveError) {
-            throw saveError;
-          } else {
-            console.log('User successfully updated!');
-            console.log(updatedUser);
-          }
-        });
-      }
-    }
-  });
+  // User.findById(doc.owner, (err, user) => {
+  //   if (err || user == null) {
+  //     console.log('Project not found!');
+  //   } else {
+  //     console.log('Found ' + user);
+  //     // Guard against null value
+  //     if(user.projects == null) {
+  //       user.projects = [];
+  //     }
+  //     if(!user.projects.includes(doc._id)) {
+  //       user.projects.push(doc._id);
+  //
+  //       user.save((saveError, updatedUser) => {
+  //         if (saveError) {
+  //           throw saveError;
+  //         } else {
+  //           console.log('User successfully updated!');
+  //           console.log(updatedUser);
+  //         }
+  //       });
+  //     }
+  //   }
+  // });
 });
 
 // the schema is useless so far
