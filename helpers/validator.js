@@ -1,5 +1,3 @@
-
-
 const fetchDeadline = async (deadlineID) => {
   return new Promise((resolve, reject) => {
     if (deadlineID != null) {
@@ -49,14 +47,14 @@ module.exports = {
         resolve({ result: true });
       } else {
         console.log('Empty Fields Found!');
-        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Fields are missing!' });
+        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Some required fields are blank!' });
       }
     }));
   },
 
   resource: async (draftResource) => {
     return new Promise(((resolve, reject) => {
-      console.log('Validating Deadline:');
+      console.log('Validating Resource:');
       console.log(draftResource);
       if (draftResource.name !== ''
          && draftResource.desc !== ''
@@ -67,7 +65,23 @@ module.exports = {
         resolve({ result: true });
       } else {
         console.log('Empty Fields Found!');
-        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Fields are missing!' });
+        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Some required fields are blank!' });
+      }
+    }));
+  },
+
+  project: async (draftProject) => {
+    return new Promise(((resolve, reject) => {
+      console.log('Validating projects:');
+      console.log(draftProject);
+      if (draftProject.title !== ''
+         && draftProject.body !== ''
+          && draftProject.date !== '') {
+        console.log('Fields are all complete!');
+        resolve({ result: true });
+      } else {
+        console.log('Empty Fields Found!');
+        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Some required fields are blank!' });
       }
     }));
   },

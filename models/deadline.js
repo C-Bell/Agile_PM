@@ -8,11 +8,11 @@ const Project = require('./project');
 const deadlineSchema = new Schema({
   project: {
     type: Schema.ObjectId,
-    ref: 'Project'
+    ref: 'Project',
   },
   datetime: Date,
   title: { type: String, required: true },
-  status: { type: String, default: "todo" },
+  status: { type: String, default: 'To Do' },
   assignee: { type: Schema.ObjectId, ref: 'User' },
   created_at: Date,
   updated_at: Date,
@@ -20,7 +20,7 @@ const deadlineSchema = new Schema({
 
 deadlineSchema.pre('save', function (next) {
   // get the current date
-  let currentDate = new Date();
+  const currentDate = new Date();
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
@@ -33,31 +33,30 @@ deadlineSchema.pre('save', function (next) {
   next();
 });
 
-deadlineSchema.post('save', function (doc) {
+deadlineSchema.post('save', (doc) => {
   console.log('%s has been saved to the db', doc._id);
   Project.findById(doc.project, (err, project) => {
     if (err) {
       throw err;
-    } else {
-      if(project != null) {
-        console.log('Found ' + project);
-        // Guard against null vlaue
-        if(project.deadlines == null) {
-          console.log('setting null to []');
-          project.deadlines = [];
-        }
-        project.deadlines.push(doc._id);
-        // TODO: Change to update to prevent multiple trigger fires
-        project.save((saveError, updatedProject) => {
-          if (saveError) {
-            throw saveError;
-          } else {
-            console.log('Project successfully updated!');
-            console.log(updatedProject);
-          }
-        });
+    } else if (project != null) {
+      console.log(`Found ${project}`);
+      // Guard against null vlaue
+      if (project.deadlines == null) {
+        console.log('setting null to []');
+        project.deadlines = [];
       }
-
+      if (project.deadlines.indexOf(doc._id) === -1) {
+        project.deadlines.push(doc._id);
+      }
+      // TODO: Change to update to prevent multiple trigger fires
+      project.save((saveError, updatedProject) => {
+        if (saveError) {
+          throw saveError;
+        } else {
+          console.log('Project successfully updated!');
+          console.log(updatedProject);
+        }
+      });
     }
   });
 });

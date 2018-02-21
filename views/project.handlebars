@@ -19,6 +19,7 @@
     <div class="col-3">
     </div>
     <div class="col-6" style="text-align: center;">
+      <a style="color: white" href="/home">Home |</a>
       <a style="color: white" href="/newprojects">New Projects |</a>
       <a style="color: white" href="/search">Search | </a>
       <a style="color: white" href="/logout">Logout</a>
@@ -55,10 +56,10 @@
                   <div class="col-4">
                     <span id="{{this._id}}" class="close">&times;</span>
                   </div>
-                  <div class="col-12">
-                    <!-- <span>To Do</span>
-                    <span>In Progress</span>
-                    <span>Done</span> -->
+                  <div class="col-12 center">
+                    <span id="{{this._id}}" class="taskState">To Do</span>
+                    <span id="{{this._id}}" class="taskState">In Progress</span>
+                    <span id="{{this._id}}" class="taskState">Done</span>
                   </div>
                 </div>
               </div>
@@ -226,7 +227,11 @@
   <!-- Modal content -->
   <div class="modal-content">
     <span id="userClose" class="modal-exit">&times;</span>
-    <h1>New User</h1>
+    <h3 class="center">New User</h3>
+    <div class="error">
+      <h7 id="userErrorCode"></h7>
+      <i><h8 id="userErrorMessage"></h8></i>
+    </div>
     {{#each allUsers}}
       <div class="subcard">
         <div class="row">
@@ -239,10 +244,6 @@
           <span id="{{this._id}}" class="add">&#43;</span>
         </div>
         <div class="col-12">
-          <div class="error">
-            <h7 id="userErrorCode"></h7>
-            <i><h8 id="userErrorMessage"></h8></i>
-          </div>
         </div>
         </div>
       </div>
@@ -311,6 +312,8 @@ window.onclick = function(event) {
 
 // Create a new Deadline as part of this project -
   $("#createDeadline").click(function(e) {
+    console.log($("#deadlinedate").val());
+    console.log($("#deadlinetitle").val());
       e.preventDefault();
       $.ajax({
         type: "POST",
@@ -321,8 +324,10 @@ window.onclick = function(event) {
           project: id,
         },
         success: function(result) {
-          window.location.reload();
+          //window.location.reload();
           console.log(JSON.stringify(result));
+          document.getElementById("taskErrorCode").innerHTML = "";
+          document.getElementById("taskErrorMessage").innerHTML = "";
         },
         error: function(result) {
           console.log(result);
@@ -374,11 +379,11 @@ window.onclick = function(event) {
                     id: e.currentTarget.id
                   },
                   success: function(result) {
-                    alert(JSON.stringify(result));
-                    //window.location.reload();
+                    //alert(JSON.stringify(result));
+                    window.location.reload();
                   },
                   error: function(result) {
-                    alert('Oops! There was a problem!');
+                    //alert('Oops! There was a problem!');
                   }
                 });
           }
@@ -398,7 +403,10 @@ window.onclick = function(event) {
                          projectId: id
                        },
                        success: function(result) {
-                         alert(JSON.stringify(result));
+                         console.log(result);
+                         document.getElementById("userErrorCode").innerHTML = "";
+                         document.getElementById("userErrorMessage").innerHTML = "";
+                         window.location.reload();
                        },
                        error: function(result) {
                          console.log(result);
@@ -432,6 +440,29 @@ window.onclick = function(event) {
                     });
               }
          });
+
+         $(".taskState").click(function(e) {
+             e.preventDefault();
+             console.log(e);
+             console.log(e.currentTarget.id);
+             if (confirm(`Are you sure you want to update this task?`)) {
+                   $.ajax({
+                     type: "POST",
+                     url: "/deadlines/update",
+                     data: {
+                       deadlineId: e.currentTarget.id,
+                       newState: e.currentTarget.innerText
+                     },
+                     success: function(result) {
+                       console.log(result);
+                       window.location.reload();
+                     },
+                     error: function(result) {
+                       alert(result.responseJSON.errorMessage);
+                     }
+                   });
+             }
+        });
   });
 
 </script>

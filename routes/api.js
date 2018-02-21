@@ -1,30 +1,32 @@
-const bodyParser = require("body-parser");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
-const mongoose = require("mongoose");
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const mongoose = require('mongoose');
 
 // Custom Mongoose Models -
-const Project = require("../models/project");
-const Deadline = require("../models/deadline");
-const Resource = require("../models/resource");
-const User = require("../models/user");
-const auth = require("basic-auth");
+const Project = require('../models/project');
+const Deadline = require('../models/deadline');
+const Resource = require('../models/resource');
+const User = require('../models/user');
+const auth = require('basic-auth');
 
 const express = require('express');
+
 const app = express.Router();
 
-const helpers = require('../helpers/apihelper')
+const helpers = require('../helpers/apihelper');
+
 const authenticateUser = helpers.authenticateUser;
 
 /* API Routes */
 
-app.post("/login", async (req, res) => {
-  let requester = auth(req);
-  let access = "none";
-  let result = await authenticateUser(requester, access);
+app.post('/login', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  const result = await authenticateUser(requester, access);
   console.log('Login POST called, result: ');
   console.log(result);
-  if(result.errorCode) {
+  if (result.errorCode) {
     res.status(404);
   } else {
     res.status(200);
@@ -32,68 +34,66 @@ app.post("/login", async (req, res) => {
   res.send(result);
 });
 
-// app.get("/users", async (req, res) => {
-//   let requester = auth(req);
-//   let access = "none";
-//   let result = await authenticateUser(requester, access);
-//   console.log(result);
-//   if (!result.errorCode) {
-//   User.find({}, function (err, users) {
-//           res.send(users);
-//       });
-//   });
-//   } else {
-//     res.send(result);
-//   }
-// });
 /*---------------------------------------------*/
 /*                  USER ROUTES                */
 /*---------------------------------------------*/
 
-app.post("/users/create", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
-  console.log(result);
+app.get('/users', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  const result = await authenticateUser(requester, access);
+  console.log(req.params);
   if (!result.errorCode) {
-    const newUser = new User({
-      name: req.body.first_name + " " + req.body.last_name,
-      username: req.body.username,
-      password: req.body.password,
-      type: req.body.type,
-      projects: null
-    });
-
-    newUser.save((err, newUser) => {
-      if (err) throw err;
-      console.log("User saved successfully!");
-      res.send(newUser);
+    User.find({}, (err, users) => {
+      res.send(users);
     });
   } else {
     res.send(result);
   }
 });
 
-app.patch("/users/update", async (req, res) => {
-  let requester = auth(req);
-  let access = "none";
-  let result = await authenticateUser(requester, access);
+app.post('/users/create', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  console.log(result);
+  if (!result.errorCode) {
+    const newUser = new User({
+      name: `${req.body.first_name} ${req.body.last_name}`,
+      username: req.body.username,
+      password: req.body.password,
+      type: req.body.type,
+      projects: null,
+    });
+
+    newUser.save((err, savedUser) => {
+      if (err) throw err;
+      console.log('User saved successfully!');
+      res.send(savedUser);
+    });
+  } else {
+    res.send(result);
+  }
+});
+
+app.patch('/users/update', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  const result = await authenticateUser(requester, access);
   // let id = req.body.userID
-  let updateFields = req.body.updates
+  const updateFields = req.body.updates;
   console.log(req.body);
 
-  if(!result.errorCode) {
-
-    User.findById(result._id, function (err, userToUpdate) {
+  if (!result.errorCode) {
+    User.findById(result._id, (err, userToUpdate) => {
       if (err || userToUpdate == null) {
         console.log('cust error');
         throw err;
-        res.send({responseCode: 204, errorCode: "User Not Found", errorMessage: "This is not a valid user ID!"})
+        res.send({ responseCode: 204, errorCode: 'User Not Found', errorMessage: 'This is not a valid user ID!' });
       } else {
         userToUpdate.set(req.body.updateFields);
-        userToUpdate.save(function (err, updatedUser) {
-          if (!err)
-          res.send(updatedUser);
+        userToUpdate.save((err, updatedUser) => {
+          if (!err) { res.send(updatedUser); }
         });
       }
     });
@@ -102,12 +102,12 @@ app.patch("/users/update", async (req, res) => {
   }
 });
 
-app.delete("/users/delete", async (req, res) => {
+app.delete('/users/delete', async (req, res) => {
   console.log(req.body);
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
-  let reply = {};
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const reply = {};
   if (!result.errorCode) {
     User.find(req.body, (err, found) => {
       console.log(`${found.name}'s account was successfully deleted!`);
@@ -127,10 +127,10 @@ app.delete("/users/delete", async (req, res) => {
 /*               DEADLINE ROUTES               */
 /*---------------------------------------------*/
 
-app.post("/deadlines/create", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
+app.post('/deadlines/create', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
   console.log(result);
 
   if (!result.errorCode) {
@@ -150,24 +150,21 @@ app.post("/deadlines/create", async (req, res) => {
   }
 });
 
-//
 
-// TODO: Fix the trigger fire on Project
-app.delete("/deadlines/delete", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
-  let id = req.body.deadlineID
-  let updateFields = req.body.updates
-  let reply = {};
+app.delete('/deadlines/delete', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const id = req.body.deadlineID;
+  const updateFields = req.body.updates;
+  const reply = {};
 
   console.log(req.body);
 
-  if(!result.errorCode) {
-
-    Deadline.find(req.body, function (err, deadlineToDelete) {
+  if (!result.errorCode) {
+    Deadline.find(req.body, (err, deadlineToDelete) => {
       if (err || deadlineToDelete == null) {
-        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid deadline ID!' });
       } else {
         deadlineToDelete[0].remove();
         console.log(`${deadlineToDelete[0]} deadline was successfully deleted!`);
@@ -176,20 +173,20 @@ app.delete("/deadlines/delete", async (req, res) => {
         reply.record = deadlineToDelete[0];
         res.send(reply);
       }
-        });
+    });
   } else {
-      return result;
-    }
+    return result;
+  }
 });
 
 /*---------------------------------------------*/
 /*               RESOURCE ROUTES               */
 /*---------------------------------------------*/
 
-app.post("/resources/create", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
+app.post('/resources/create', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
 
   if (!result.errorCode) {
     const newResource = new Resource({
@@ -197,7 +194,7 @@ app.post("/resources/create", async (req, res) => {
       name: req.body.name,
       desc: req.body.desc,
       fromDate: req.body.fromDate,
-      toDate: req.body.toDate
+      toDate: req.body.toDate,
     });
 
     newResource.save((err, resource) => {
@@ -210,25 +207,24 @@ app.post("/resources/create", async (req, res) => {
 });
 
 // TODO: Fix the trigger fire on Project
-app.patch("/resources/update", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
-  let id = req.body.resourceID
-  let updateFields = req.body.updates
+app.patch('/resources/update', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const id = req.body.resourceID;
+  const updateFields = req.body.updates;
   console.log(req.body);
-  if(!result.errorCode) {
-    console.log("No errorcode")
-    Resource.findById(id, function (err, resourceToUpdate) {
+  if (!result.errorCode) {
+    console.log('No errorcode');
+    Resource.findById(id, (err, resourceToUpdate) => {
       if (err || resourceToUpdate == null) {
-        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid resource ID!"})
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid resource ID!' });
         throw err;
       } else {
         resourceToUpdate.set(req.body.updateFields);
-        resourceToUpdate.save(function (saveErr, updatedResource) {
-          console.log('Resource created' + updatedResource);
-          if (!saveErr)
-          res.send(updatedResource);
+        resourceToUpdate.save((saveErr, updatedResource) => {
+          console.log(`Resource created${updatedResource}`);
+          if (!saveErr) { res.send(updatedResource); }
         });
       }
     });
@@ -237,22 +233,21 @@ app.patch("/resources/update", async (req, res) => {
   }
 });
 
-app.delete("/resources/delete", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
-  let updateFields = req.body.updates
-  let reply = {};
+app.delete('/resources/delete', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const updateFields = req.body.updates;
+  const reply = {};
 
   console.log(req.body);
 
-  if(!result.errorCode) {
-
-    Resource.find(req.body, function (err, resourceToDelete) {
+  if (!result.errorCode) {
+    Resource.find(req.body, (err, resourceToDelete) => {
       if (err || resourceToDelete[0] == null) {
-        res.send({responseCode: 204, errorCode: "Record Not Found", errorMessage: "This is not a valid deadline ID!"})
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid deadline ID!' });
       } else {
-        console.log(`Matching Records: ${resourceToDelete}`)
+        console.log(`Matching Records: ${resourceToDelete}`);
         resourceToDelete[0].remove();
         console.log(`${resourceToDelete[0]} deadline was successfully deleted!`);
         reply.executor = requester.name;
@@ -260,37 +255,36 @@ app.delete("/resources/delete", async (req, res) => {
         reply.record = resourceToDelete[0];
         res.send(reply);
       }
-        });
+    });
   } else {
-      return result;
-    }
+    return result;
+  }
 });
 
 /*---------------------------------------------*/
 /*                 PROJECT ROUTES              */
 /*---------------------------------------------*/
 
-app.post("/projects/create", async (req, res) => {
-  let requester = auth(req);
-  let access = "admin";
-  let result = await authenticateUser(requester, access);
+app.post('/projects/create', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
 
   if (!result.error) {
-
     // Build our object in accordance to the Schema
-    let projectSchema = new Project({
+    const projectSchema = new Project({
       owner: result._id,
       title: req.body.title,
       body: req.body.body,
       date: req.body.date,
       deadlines: null,
-      resources: null
+      resources: null,
     });
 
     // Save our object in accordance to the Schema
     projectSchema.save((err, newProject) => {
       if (err) throw err;
-      console.log("Project saved successfully!");
+      console.log('Project saved successfully!');
       // Render the project page
       console.log(newProject);
       res.send(newProject);

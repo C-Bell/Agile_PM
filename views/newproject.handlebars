@@ -55,6 +55,12 @@
                     <button type="button" onclick="window.location = '/home';" class="button-red">Back</button>
                     <button type="button" id="create" class="button-green">Create</button>
                   </div>
+                  <div class="col-12">
+                  <div class="error">
+                    <h7 id="errorCode"></h7>
+                    <i><h8 id="errorMessage"></h8></i>
+                  </div>
+                </div>
                 </div>
           </div>
         </div>
@@ -98,7 +104,8 @@ $(document).ready(function() {
           window.location = "/home";
         },
         error: function(result) {
-          alert('error');
+          document.getElementById("errorCode").innerHTML = (result.responseJSON.errorCode + ' - ');
+          document.getElementById("errorMessage").innerHTML = result.responseJSON.errorMessage;
         }
       });
     });

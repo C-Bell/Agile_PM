@@ -9,7 +9,7 @@ const Project = require('./project');
 const resourceSchema = new Schema({
   project: {
     type: Schema.ObjectId,
-    ref: 'Project'
+    ref: 'Project',
   },
   name: { type: String, required: true },
   desc: { type: String, required: true },
@@ -23,7 +23,7 @@ resourceSchema.pre('save', function (next) {
   // TODO: Validation Set-up
 
   // get the current date
-  let currentDate = new Date();
+  const currentDate = new Date();
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
@@ -36,18 +36,20 @@ resourceSchema.pre('save', function (next) {
   next();
 });
 
-resourceSchema.post('save', function (doc) {
+resourceSchema.post('save', (doc) => {
   console.log('%s - New Resource Created', doc._id);
   Project.findById(doc.project, (err, project) => {
     if (err) {
       throw err;
     } else {
-      console.log('Adding resource to ' + project.title);
+      console.log(`Adding resource to ${project.title}`);
       // Guard against null vlaue
-      if(project.resources == null) {
+      if (project.resources == null) {
         project.resources = [];
       }
-      project.resources.push(doc._id);
+      if (project.resources.indexOf(doc._id) === -1) {
+        project.resources.push(doc._id);
+      }
       // TODO: Change to update to prevent multiple trigger fires
       project.save((saveError, updatedProject) => {
         if (saveError) {
@@ -61,7 +63,7 @@ resourceSchema.post('save', function (doc) {
   });
 });
 
-resourceSchema.post('remove', function (doc) {
+resourceSchema.post('remove', (doc) => {
   // console.log('%s - Resource Deleted', doc);
   // Project.find(doc.project, (err, project) => {
   //   console.log(project);
@@ -80,26 +82,26 @@ resourceSchema.post('remove', function (doc) {
   //     }
   //   });
 
-    // TODO: Remove from project on delete
-    // if (err) {
-    //   throw err;
-    // } else {
-    //   console.log('Adding resource to ' + project.title);
-    //   // Guard against null vlaue
-    //   if(project.resources == null) {
-    //     project.resources = [];
-    //   }
-    //   project.resources.push(doc._id);
-    //   // TODO: Change to update to prevent multiple trigger fires
-    //   project.save((saveError, updatedProject) => {
-    //     if (saveError) {
-    //       throw saveError;
-    //     } else {
-    //       console.log('Project successfully updated!');
-    //       console.log(updatedProject);
-    //     }
-    //   });
-    // }
+  // TODO: Remove from project on delete
+  // if (err) {
+  //   throw err;
+  // } else {
+  //   console.log('Adding resource to ' + project.title);
+  //   // Guard against null vlaue
+  //   if(project.resources == null) {
+  //     project.resources = [];
+  //   }
+  //   project.resources.push(doc._id);
+  //   // TODO: Change to update to prevent multiple trigger fires
+  //   project.save((saveError, updatedProject) => {
+  //     if (saveError) {
+  //       throw saveError;
+  //     } else {
+  //       console.log('Project successfully updated!');
+  //       console.log(updatedProject);
+  //     }
+  //   });
+  // }
   // });
 });
 

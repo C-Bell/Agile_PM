@@ -247,3 +247,8 @@ body {
   text-align:center;
   color:indianred;
 }
+
+.taskState {
+  padding:5px;
+  color:lightslategrey;
+}
