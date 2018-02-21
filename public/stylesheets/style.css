@@ -198,3 +198,52 @@ body {
 .center {
     text-align:center;
 }
+
+.add {
+  float: right;
+  /* size: 12px; */
+  font-size: 24px;
+  color: lightslategrey;
+}
+
+.add:hover,
+.add:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+.modal-exit {
+  float: left;
+  font-size: 24px;
+  color: lightslategrey;
+}
+
+.modal-exit:hover,
+.modal-exit:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+.remove {
+  float: right;
+  font-size: 24px;
+  color: lightslategrey;
+}
+
+.remove:hover,
+.remove:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.error {
+  padding-top: 10px;
+  float: centered;
+  text-align:center;
+  color:indianred;
+}

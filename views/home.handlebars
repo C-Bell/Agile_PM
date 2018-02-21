@@ -1,35 +1,42 @@
 <header>
+  <div class="container">
   <div class="row align-items-center">
-    <div class="col-2">
-      <img width="100px" src="images/PM_Icon.jpg"/>
+    <div class="col-4">
+      <img width="100px" src="/images/PM_Icon.jpg"/>
     </div>
-    <div class="col-6">
-      <h3> Agility PM </h3>
+    <div class="col-4">
+      <h3 style="text-align: center;"> Agility PM </h3>
     </div>
     <div class="col-4 usertitle">
-      <a href="/home">Hi <span id="username"></span></a>
+      <a href="/home">Hi <span id="username">{{user.name}}</span></a>
     </div>
+  </div>
   </div>
 </header>
 <header class="subheader">
+  <div class="container">
   <div class="row align-items-center">
-    <div class="col-4">
+    <div class="col-3">
     </div>
-    <div class="col-4" style="text-align: center;">
+    <div class="col-6" style="text-align: center;">
       <a style="color: white" href="/newprojects">New Projects |</a>
-      <a style="color: white" href="/newprojects">Search</a>
+      <a style="color: white" href="/search">Search | </a>
+      <a style="color: white" href="/logout">Logout</a>
+    </div>
     </div>
   </div>
 </header/>
 
-<div class="login-padding" style="padding-top: 10%">
-  <div class="container">
-      <div>
-        <div class="row card align-items-center">
-          <h3> Project Overview </h3>
-          <div class="container" id="List"></div>
+<div class="container">
+  <div class="login-padding" style="padding-top: 10%">
+    <div class="container">
+        <div>
+          <div class="row card align-items-center">
+            <h3> Project Overview </h3>
+            <div class="col-12" id="List"></div>
+          </div>
         </div>
-      </div>
+    </div>
   </div>
 </div>
 
@@ -59,7 +66,8 @@ $(document).ready(function() {
         document.getElementById("username").innerHTML = result.name;
       },
       error: function(result) {
-        alert('error');
+        console.log(result);
+        alert(JSON.stringify(result.responseJSON.errorMessage));
       }
     });
 
@@ -86,7 +94,8 @@ $(document).ready(function() {
         document.getElementById("List").innerHTML = renderString;
       },
       error: function(result) {
-        alert('error');
+        console.log(result);
+        alert(JSON.stringify(result.responseJSON.errorMessage));
       }
     });
 

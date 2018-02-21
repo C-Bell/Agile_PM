@@ -22,6 +22,7 @@ app.post("/login", async (req, res) => {
   let requester = auth(req);
   let access = "none";
   let result = await authenticateUser(requester, access);
+  console.log('Login POST called, result: ');
   console.log(result);
   if(result.errorCode) {
     res.status(404);

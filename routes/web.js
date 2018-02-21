@@ -38,25 +38,28 @@ app.post("/register", async (req, res) => {
       projects: null
     });
 
-    // TODO: Modular validation
     isValidUser = await validator.user(newUser);
 
-    console.log('The result of the validation: ' + isValidUser );
+    console.log('The result of the validation: ' + isValidUser.result );
+    if(isValidUser.result) {
+      newUser.save((err, newUser) => {
+        if(err) {
+          console.log(err);
+        } else {
+        console.log("User saved successfully!");
+        console.log(newUser);
+        // Log the newly registered user in - I.E Authorise this session
+        req.session.Authed = true;
+        req.session.userID = newUser._id;
+        console.log(req.session);
 
-    newUser.save((err, newUser) => {
-      if(err) {
-        console.log(err);
-      } else {
-      console.log("User saved successfully!");
-      console.log(newUser);
-      // Log the newly registered user in - I.E Authorise this session
-      req.session.Authed = true;
-      req.session.userID = newUser._id;
-      console.log(req.session);
-
-      res.send(newUser);
-    }
-  });
+        res.send(newUser);
+      }
+    });
+  } else {
+    res.status(400);
+    res.send(isValidUser);
+  }
 });
 
 /* --------------------------- Login POST Request ------------------------- */
@@ -80,7 +83,7 @@ app.post("/login", (req, res) => {
         // Authorise this session
         req.session.Authed = true;
         req.session.userID = user[0]._id; // TODO: Vulnerability
-        console.log(req.session);
+        // console.log(req.session);
         // Send an OK status code for: Successfully executed
         res.sendStatus(200);
       }
@@ -140,7 +143,7 @@ app.delete("/delete", async (req, res) => {
       if(err) {
         console.log(err);
       } else {
-        console.log(`Deadline ${req.body.id} deleted.`)
+        console.log(`Resource ${req.body.id} deleted.`)
       }
     });
 
@@ -170,7 +173,11 @@ app.get('/projects/:pID', async (req, res) => {
           user: result,
           allUsers: userList,
           helpers: { // TODO
-            isAdmin: function (result) { if(result.type == null) {return true;} else {return false;} },
+            isAdmin: function (result) {
+               if(result.type == null)
+               {return true;} else
+               {return false;}
+             },
             isUserOrAbove: function (result) { if(result.type == "admin" || result.type == "user") {return true;} else {return false;} }
           }
       });
@@ -229,10 +236,27 @@ app.post("/projects/addUser", async (req, res) => {
   }
 });
 
+app.post("/projects/removeUser", async (req, res) => {
+  let requester = req.session
+  let access = "none";
+  let result = await authenticateUser(requester, access);
+  console.log(`Removing ${req.body.userId} from ${req.body.projectId}`);
+  console.log(req.body);
+
+  if (!result.error) { // Is this a valid user?
+    let success = await helpers.removeProjectFromUser(req.body.userId, req.body.projectId);
+    console.log(success);
+    res.send(success);
+  } else { // Send result which is a Error JSON object
+    res.send(result);
+  }
+});
+
 app.post("/deadlines/create", async (req, res) => {
   let requester = req.session;
   let access = "none";
   let result = await authenticateUser(requester, access);
+  let isValidDeadline = false;
   console.log('Input from user for new Deadline: ');
   console.log(req.body);
 
@@ -244,14 +268,19 @@ app.post("/deadlines/create", async (req, res) => {
       assignee: req.body.assignee,
     });
 
-    console.log(newDeadline);
+    isValidDeadline = await validator.deadline(newDeadline);
 
-    newDeadline.save((err, deadline) => {
-      if (err) throw err;
-      res.send(deadline);
-    });
-  } else { // Send Error Code
-    res.send(result);
+    console.log(isValidDeadline.result);
+
+    if(isValidDeadline.result == true) {
+      newDeadline.save((err, deadline) => {
+        if (err) throw err;
+        res.send(deadline);
+      });
+    } else { // Send Error Code
+      res.status(400);
+      res.send(isValidDeadline);
+    }
   }
 });
 

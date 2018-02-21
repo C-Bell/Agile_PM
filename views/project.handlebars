@@ -1,28 +1,33 @@
 <header>
+  <div class="container">
   <div class="row align-items-center">
-    <div class="col-2">
-      <img width="100px" src="images/PM_Icon.jpg"/>
+    <div class="col-4">
+      <img width="100px" src="/images/PM_Icon.jpg"/>
     </div>
-    <div class="col-6">
-      <h3> Agility PM </h3>
+    <div class="col-4">
+      <h3 style="text-align: center;"> Agility PM </h3>
     </div>
     <div class="col-4 usertitle">
       <a href="/home">Hi <span id="username">{{user.name}}</span></a>
     </div>
   </div>
+  </div>
 </header>
 <header class="subheader">
+  <div class="container">
   <div class="row align-items-center">
-    <div class="col-4">
+    <div class="col-3">
     </div>
-    <div class="col-4" style="text-align: center;">
-      <a style="color: white" href="/home">Home | </a>
-      <a style="color: white" href="/newprojects">New Projects | </a>
-      <a style="color: white" href="/search">Search</a>
+    <div class="col-6" style="text-align: center;">
+      <a style="color: white" href="/newprojects">New Projects |</a>
+      <a style="color: white" href="/search">Search | </a>
+      <a style="color: white" href="/logout">Logout</a>
+    </div>
     </div>
   </div>
 </header/>
 
+<div class="container">
 <div class="login-padding">
   <div class="container">
       <div>
@@ -38,23 +43,28 @@
   <div class="container">
       <div>
         <div class="row card align-items-center">
-          <h3>Deadlines</h3>
+          <h3>Tasks</h3>
           <div class="container" id="deadlines">
             {{#each deadlines}}
               <div class="subcard" data="deadline" id="{{this._id}}">
                 <div class="row">
                   <div class="col-8">
-                    <h5>{{this.title}} - {{this.status}}</h5>
+                    <h5>{{this.title}} - ({{this.status}})</h5>
                     <p>{{this.datetime}}</p>
                   </div>
                   <div class="col-4">
                     <span id="{{this._id}}" class="close">&times;</span>
                   </div>
+                  <div class="col-12">
+                    <!-- <span>To Do</span>
+                    <span>In Progress</span>
+                    <span>Done</span> -->
+                  </div>
                 </div>
               </div>
             {{/each}}
             <div class="add-box" id="newdeadline">
-              Add New Deadline
+              Add New Task
             </div>
           </div>
         </div>
@@ -99,7 +109,7 @@
       <div>
         <div class="row card align-items-center">
           <h3>Users</h3>
-          <div class="container" id="deadlines">
+          <div class="col-12" id="deadlines">
             {{#each users}}
               <div class="subcard">
                 <div class="row">
@@ -109,6 +119,7 @@
                 </div>
                 <div class ="col-3">
                   <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
+                  <span id="{{this._id}}" class="remove">&times;</span>
                 </div>
                 </div>
               </div>
@@ -142,7 +153,7 @@
 
   <!-- Modal content -->
   <div class="modal-content">
-    <span class="close">&times;</span>
+    <span id="deadlineClose" class="modal-exit">&times;</span>
     <div class="row align-items-center centre">
       <div class="container">
         <h3> New Task </h3>
@@ -159,6 +170,10 @@
                 <button type="button" id="createDeadline" class="button-green">Create</button>
               </div>
             </div>
+            <div class="error">
+              <h7 id="taskErrorCode"></h7>
+              <i><h8 id="taskErrorMessage"></h8></i>
+            </div>
       </div>
     </div>
   </div>
@@ -169,7 +184,7 @@
 
   <!-- Modal content -->
   <div class="modal-content">
-    <span class="close">&times;</span>
+    <span id="resourceClose" class="modal-exit">&times;</span>
     <div class="row align-items-center centre">
       <div class="container">
         <h3> New Resource </h3>
@@ -193,6 +208,12 @@
               <div class="col-12">
                 <button type="button" id="createResource" class="button-green">Create</button>
               </div>
+              <div class="col-12">
+                <div class="error">
+                  <h7 id="resourceErrorCode"></h7>
+                  <i><h8 id="resourceErrorMessage"></h8></i>
+                </div>
+              </div>
             </div>
       </div>
     </div>
@@ -204,7 +225,7 @@
 
   <!-- Modal content -->
   <div class="modal-content">
-    <span class="close">&times;</span>
+    <span id="userClose" class="modal-exit">&times;</span>
     <h1>New User</h1>
     {{#each allUsers}}
       <div class="subcard">
@@ -213,9 +234,15 @@
           <h6>{{this.name}}</h6>
           <p>{{this.username}}</p>
         </div>
-        <div class ="col-3">
+        <div class="col-3">
           <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
           <span id="{{this._id}}" class="add">&#43;</span>
+        </div>
+        <div class="col-12">
+          <div class="error">
+            <h7 id="userErrorCode"></h7>
+            <i><h8 id="userErrorMessage"></h8></i>
+          </div>
         </div>
         </div>
       </div>
@@ -223,21 +250,22 @@
   </div>
 
 </div>
+</div>
 
 <script>
 $(document).ready(function() {
 
 var deadlineModal = document.getElementById('deadlineModal');
 var deadlineBtn = document.getElementById("newdeadline");
-var deadlineSpan = document.getElementsByClassName("close")[0];
+var deadlineSpan = document.getElementById("deadlineClose");
 
 var resourceModal = document.getElementById('resourceModal');
 var resourceBtn = document.getElementById("newresource");
-var resourceSpan = document.getElementsByClassName("close")[1];
+var resourceSpan = document.getElementById("resourceClose");
 
 var userModal = document.getElementById('userModal');
 var userBtn = document.getElementById("newuser");
-var userSpan = document.getElementsByClassName("close")[2];
+var userSpan = document.getElementById("userClose");
 
 var url = window.location.href;
 var id = url.substring(url.lastIndexOf('/') + 1);
@@ -297,7 +325,11 @@ window.onclick = function(event) {
           console.log(JSON.stringify(result));
         },
         error: function(result) {
-          alert('Oops! There was a problem!');
+          console.log(result);
+          if(result.responseJSON != null) {
+            document.getElementById("taskErrorCode").innerHTML = result.responseJSON.errorCode;
+            document.getElementById("taskErrorMessage").innerHTML = result.responseJSON.errorMessage;
+          }
         }
       });
     });
@@ -320,7 +352,11 @@ window.onclick = function(event) {
             console.log(JSON.stringify(result));
           },
           error: function(result) {
-            alert('Oops! There was a problem!');
+            console.log(result);
+            if(result.responseJSON != null) {
+              document.getElementById("resourceErrorCode").innerHTML = result.responseJSON.errorCode;
+              document.getElementById("resourceErrorMessage").innerHTML = result.responseJSON.errorMessage;
+            }
           }
         });
       });
@@ -365,11 +401,37 @@ window.onclick = function(event) {
                          alert(JSON.stringify(result));
                        },
                        error: function(result) {
-                         alert('Oops! There was a problem!');
+                         console.log(result);
+                         if(result.responseJSON != null) {
+                           document.getElementById("userErrorCode").innerHTML = result.responseJSON.errorCode;
+                           document.getElementById("userErrorMessage").innerHTML = result.responseJSON.errorMessage;
+                         }
                        }
                      });
                }
           });
+
+          $(".remove").click(function(e) {
+              e.preventDefault();
+              console.log(e);
+              console.log(e.currentTarget.id);
+              if (confirm(`Are you sure you want to remove this user?`)) {
+                    $.ajax({
+                      type: "POST",
+                      url: "/projects/removeUser",
+                      data: {
+                        userId: e.currentTarget.id,
+                        projectId: id
+                      },
+                      success: function(result) {
+                        alert(JSON.stringify(result));
+                      },
+                      error: function(result) {
+                        alert(result.responseJSON.errorMessage);
+                      }
+                    });
+              }
+         });
   });
 
 </script>

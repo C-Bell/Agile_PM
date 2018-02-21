@@ -285,6 +285,47 @@ Output:
    });
  },
 
+ removeProjectFromUser: async (userID, projectID) => {
+   return new Promise((resolve, reject) => {
+     console.log(`Looking for: ${userID}`);
+     User.find({ _id: userID }, (err, found) => {
+       if (err || found[0] == null) {
+         console.log("Incorrect Password!");
+         resolve({
+           responseCode: 404, // 404 Response Code - User not found
+           errorCode: "Incorrect Password",
+           // User friendly message
+           errorMessage:
+             "We did not recognise that username and password, please try again!"
+         });
+       } else {
+         console.log('Found: ' + found);
+         // If its a null value, set it to an array
+         if (found[0].projects == null) {
+           found[0].projects = [];
+         }
+
+           console.log("User Found, Removing Project ID!");
+           for (let i = 0; i < found[0].projects.length; i++) {
+             console.log(found[0].projects[i] + ' : ' + projectID);
+             if (found[0].projects[i] == projectID) {
+               console.log('Removing Project ' + projectID);
+               found[0].projects.splice(i, 1);
+               break;
+             }
+           }
+
+           found[0].save(function (err, updatedProject) {
+             if (err) {
+               resolve(err);
+             }
+             resolve(updatedProject);
+           });
+       }
+     });
+   });
+ },
+
  // TODO: Complete
   // addUserToProject: async (userID, projectID) => {
   //   return new Promise((resolve, reject) => {

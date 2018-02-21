@@ -2,10 +2,10 @@
 
 const fetchDeadline = async (deadlineID) => {
   return new Promise((resolve, reject) => {
-    if(deadlineID != null) {
-      console.log('Fetching Deadline: ' + deadlineID);
-      Deadline.findById(deadlineID, function (err, deadline) {
-        if(deadline != null) {
+    if (deadlineID != null) {
+      console.log(`Fetching Deadline: ${deadlineID}`);
+      Deadline.findById(deadlineID, (err, deadline) => {
+        if (deadline != null) {
           console.log('Deadline Found!');
           console.log(deadline);
           resolve(deadline);
@@ -18,25 +18,58 @@ const fetchDeadline = async (deadlineID) => {
       reject(resourceID);
     }
   });
-}
+};
 
 module.exports = {
 
   user: async (draftUser) => {
-    new Promise(function(resolve, reject) {
+    return new Promise(((resolve, reject) => {
+      console.log('Validating User:');
       console.log(draftUser);
-        if(draftUser.first_name != null
-           && draftUser.last_name != null
-            && draftUser.username != null
-             && draftUser.password != null) {
-               if(password.length < 4) {
-                 console.log('Password too short!');
-                 resolve({result: false, reason: 'Too few characters in password'});
-               }
-             }
+      if (draftUser.first_name != ''
+           && draftUser.last_name != ''
+            && draftUser.username != ''
+             && draftUser.password != '') {
         console.log('No fields are null!');
         resolve({ result: true });
-  });
-  }
+      }
+      resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Some required fields are blank!' });
+    }));
+  },
 
-}
+  deadline: async (draftDeadline) => {
+    return new Promise(((resolve, reject) => {
+      console.log('Validating Deadline:');
+      console.log(draftDeadline);
+      if (draftDeadline.title != ''
+         && draftDeadline.datetime != ''
+          && draftDeadline.assignee != ''
+           && draftDeadline.project != '') {
+        console.log('Fields are all complete!');
+        resolve({ result: true });
+      } else {
+        console.log('Empty Fields Found!');
+        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Fields are missing!' });
+      }
+    }));
+  },
+
+  resource: async (draftResource) => {
+    return new Promise(((resolve, reject) => {
+      console.log('Validating Deadline:');
+      console.log(draftResource);
+      if (draftResource.name !== ''
+         && draftResource.desc !== ''
+          && draftResource.fromDate !== ''
+           && draftResource.toDate !== ''
+            && draftResource.project !== '') {
+        console.log('Fields are all complete!');
+        resolve({ result: true });
+      } else {
+        console.log('Empty Fields Found!');
+        resolve({ result: false, errorCode: 'Empty Fields', errorMessage: 'Fields are missing!' });
+      }
+    }));
+  },
+
+};
