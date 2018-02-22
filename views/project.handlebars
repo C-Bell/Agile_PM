@@ -384,13 +384,13 @@ window.onclick = function(event) {
                     window.location.reload();
                   },
                   error: function(result) {
-                    //alert('Oops! There was a problem!');
+                    console.log(result);
+                    alert(result.responseJSON.errorMessage);
                   }
                 });
           }
      });
 
-     // https://www.w3schools.com/js/tryit.asp?filename=tryjs_confirm
            $(".add").click(function(e) {
                e.preventDefault();
                console.log(e);

@@ -15,22 +15,26 @@ const express = require('express');
 const app = express.Router();
 
 const helpers = require('../helpers/apihelper');
+const validator = require('../helpers/validator');
 
 const authenticateUser = helpers.authenticateUser;
 
 /* API Routes */
 
 app.get('/login', async (req, res) => {
-  const requester = auth(req);
+  // Identify our requester using the session
+  const requester = auth(req); // -> {username: x, password: y}
+  // Specify the access required to access this route
   const access = 'none';
+  // Find out if our user exists and holds the right access
   const result = await authenticateUser(requester, access);
-  // console.log('Login POST called, result: ');
-  // console.log(result);
-  if (result.errorCode) {
-    res.status(404);
-  } else {
+  // If theres not an error, the user exists and meets the access criteria
+  if (!result.errorCode) {
     res.status(200);
+  } else {
+    res.status(404);
   }
+  // Returns a human readable error
   res.send(result);
 });
 
@@ -40,23 +44,31 @@ app.get('/login', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   const requester = auth(req);
-  const access = 'none';
+  const access = 'admin';
   const result = await authenticateUser(requester, access);
+  // Reply object to store all the fields
   const reply = {};
-  // console.log(req.query);
+
+  // If there wasn't an error
   if (!result.errorCode) {
+    // Find a user based on the params provided
     User.find(req.query, (err, users) => {
       if (err) {
         // console.log(err);
         res.send(err);
       }
+      // Assign our username as the 'executor'
       reply.executor = requester.name;
+      // Specify the success of the request
       reply.success = true;
+      // Add our usable data under .record
       reply.record = users;
+      res.status(200); // OK Status
       res.send(reply);
     });
   } else {
-    res.send(result);
+    res.status(401); // Forbidden Status
+    res.send(result); // Return human readable result
   }
 });
 
@@ -75,15 +87,21 @@ app.post('/users/create', async (req, res) => {
       type: req.body.type,
       projects: null,
     });
-    // console.log(`Saving ${newUser.username}`);
-    newUser.save((err, savedUser) => {
-      if (err) throw err;
-      // console.log('User saved successfully!');
-      reply.executor = requester.name;
-      reply.success = true;
-      reply.record = savedUser;
-      res.send(reply);
-    });
+    // Is this a valid user object?
+    const isValidUser = await validator.user(newUser);
+    // Returns either {result : true} or a human readable error.
+
+    if (isValidUser.result) {
+      newUser.save((err, savedUser) => {
+        if (err) throw err;
+        reply.executor = requester.name;
+        reply.success = true;
+        reply.record = savedUser;
+        res.send(reply);
+      });
+    } else {
+      res.send(isValidUser);
+    }
   } else {
     res.send(result);
   }
@@ -93,19 +111,34 @@ app.patch('/users/update', async (req, res) => {
   const requester = auth(req);
   const access = 'none';
   const result = await authenticateUser(requester, access);
-  // let id = req.body.userID
+  // If a ID is not specified, we assume we are talking about the accessing user
+  let findID = req.body.id;
+  // If ID is null, we are targetting ourselves the executor.
+  if (req.body.id == null) {
+    findID = result._id;
+  }
+
   const updateFields = req.body.updates;
-  // console.log(req.body);
 
   if (!result.errorCode) {
-    User.findById(result._id, (err, userToUpdate) => {
+    User.findById(findID, async (err, userToUpdate) => {
       if (err || userToUpdate == null) {
         res.send({ responseCode: 204, errorCode: 'User Not Found', errorMessage: 'This is not a valid user ID!' });
       } else {
         userToUpdate.set(req.body.updateFields);
-        userToUpdate.save((saveErr, updatedUser) => {
-          if (!saveErr) { res.send(updatedUser); }
-        });
+        // Validate that the new user object still meets our standards,
+        const isValidUser = await validator.user(userToUpdate);
+        // Returns either {result : true} or a human readable error.
+
+        // If this object is valid
+        if (isValidUser.result) {
+          //  Save the object
+          userToUpdate.save((saveErr, updatedUser) => {
+            if (!saveErr) { res.send(updatedUser); }
+          });
+        } else {
+          res.send(isValidUser);
+        }
       }
     });
   } else {
@@ -114,16 +147,16 @@ app.patch('/users/update', async (req, res) => {
 });
 
 app.delete('/users/delete', async (req, res) => {
-  // console.log(req.body);
   const requester = auth(req);
   const access = 'admin';
   const result = await authenticateUser(requester, access);
   const reply = {};
+
   if (!result.errorCode) {
     User.find(req.body, (err, found) => {
-      // console.log(`${found.name}'s account was successfully deleted!`);
-      // console.log(found[0]);
+      // Use the built-in remove function
       found[0].remove();
+      // Form the reply object
       reply.executor = requester.name;
       reply.success = true;
       reply.record = found;
@@ -140,7 +173,7 @@ app.delete('/users/delete', async (req, res) => {
 
 app.get('/deadlines', async (req, res) => {
   const requester = auth(req);
-  const access = 'none';
+  const access = 'admin';
   const result = await authenticateUser(requester, access);
   const reply = {};
   // console.log(req.query);
@@ -162,7 +195,7 @@ app.get('/deadlines', async (req, res) => {
 
 app.post('/deadlines/create', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
   // console.log(result);
 
@@ -173,36 +206,49 @@ app.post('/deadlines/create', async (req, res) => {
       title: req.body.title,
       assignee: req.body.assignee,
     });
+    // Is our new object up to the standards in the validator?
+    const isValidDeadline = await validator.deadline(newDeadline);
 
-    newDeadline.save((err, deadline) => {
-      if (err) throw err;
-      res.send(deadline);
-    });
+    if (isValidDeadline.result) {
+      newDeadline.save((err, deadline) => {
+        if (err) throw err;
+        res.send(deadline);
+      });
+    } else {
+      // Responds why the object didn't pass the validator
+      res.send(isValidDeadline);
+    }
   } else {
+    // Responds why the user wasn't able to access the route logic
     res.send(result);
   }
 });
 
-// TODO: Fix the trigger fire on Project
 app.patch('/deadlines/update', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
   const id = req.body.deadlineID;
   const updateFields = req.body.updates;
   // console.log(req.body);
   if (!result.errorCode) {
     // console.log('No errorcode');
-    Deadline.findById(id, (err, deadlineToUpdate) => {
+    Deadline.findById(id, async (err, deadlineToUpdate) => {
       if (err || deadlineToUpdate == null) {
         res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid resource ID!' });
         throw err;
       } else {
         deadlineToUpdate.set(req.body.updateFields);
-        deadlineToUpdate.save((saveErr, updatedDeadline) => {
-          // console.log(`Resource created${updatedDeadline}`);
-          if (!saveErr) { res.send(updatedDeadline); }
-        });
+
+        const isValidDeadline = await validator.deadline(deadlineToUpdate);
+
+        if (isValidDeadline.result) {
+          deadlineToUpdate.save((saveErr, updatedDeadline) => {
+            if (!saveErr) { res.send(updatedDeadline); }
+          });
+        } else {
+          res.send(isValidDeadline);
+        }
       }
     });
   } else {
@@ -245,7 +291,7 @@ app.delete('/deadlines/delete', async (req, res) => {
 
 app.get('/resources', async (req, res) => {
   const requester = auth(req);
-  const access = 'none';
+  const access = 'admin';
   const result = await authenticateUser(requester, access);
   const reply = {};
   // console.log(req.query);
@@ -267,7 +313,7 @@ app.get('/resources', async (req, res) => {
 
 app.post('/resources/create', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
 
   if (!result.errorCode) {
@@ -278,36 +324,49 @@ app.post('/resources/create', async (req, res) => {
       fromDate: req.body.fromDate,
       toDate: req.body.toDate,
     });
+    // Validate our new resource object against the validator
+    const isValidResource = await validator.deadline(newResource);
 
-    newResource.save((err, resource) => {
-      if (err) throw err;
-      res.send(resource);
-    });
+    if (isValidResource.result) {
+      // If valid save
+      newResource.save((err, resource) => {
+        if (err) throw err;
+        res.send(resource);
+      });
+      // Otherwise explain the error
+    } else {
+      res.send(isValidResource);
+    }
   } else {
     res.send(result);
   }
 });
 
-// TODO: Fix the trigger fire on Project
 app.patch('/resources/update', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
   const id = req.body.resourceID;
   const updateFields = req.body.updates;
   // console.log(req.body);
   if (!result.errorCode) {
     // console.log('No errorcode');
-    Resource.findById(id, (err, resourceToUpdate) => {
+    Resource.findById(id, async (err, resourceToUpdate) => {
       if (err || resourceToUpdate == null) {
         res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid resource ID!' });
         throw err;
       } else {
         resourceToUpdate.set(req.body.updateFields);
-        resourceToUpdate.save((saveErr, updatedResource) => {
-          // console.log(`Resource created${updatedResource}`);
-          if (!saveErr) { res.send(updatedResource); }
-        });
+        // Does the updated object still meet our requirements?
+        const isValidResource = await validator.deadline(resourceToUpdate);
+
+        if (isValidResource.result) {
+          resourceToUpdate.save((saveErr, updatedResource) => {
+            if (!saveErr) { res.send(updatedResource); }
+          });
+        } else {
+          res.send(isValidResource);
+        }
       }
     });
   } else {
@@ -349,7 +408,7 @@ app.delete('/resources/delete', async (req, res) => {
 
 app.get('/projects', async (req, res) => {
   const requester = auth(req);
-  const access = 'none';
+  const access = 'admin';
   // console.log(requester);
   const result = await authenticateUser(requester, access);
   const reply = {};
@@ -377,7 +436,7 @@ app.get('/projects', async (req, res) => {
 
 app.post('/projects/create', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
   const reply = {};
 
@@ -408,13 +467,14 @@ app.post('/projects/create', async (req, res) => {
       }
     });
   } else {
+    res.status(401);
     res.send(result);
   }
 });
 
 app.patch('/projects/update', async (req, res) => {
   const requester = auth(req);
-  const access = 'admin';
+  const access = 'none';
   const result = await authenticateUser(requester, access);
   const id = req.body.projectId;
   const updateFields = req.body.updates;

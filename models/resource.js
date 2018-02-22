@@ -20,8 +20,6 @@ const resourceSchema = new Schema({
 });
 
 resourceSchema.pre('save', function (next) {
-  // TODO: Validation Set-up
-
   // get the current date
   const currentDate = new Date();
 
@@ -36,21 +34,26 @@ resourceSchema.pre('save', function (next) {
   next();
 });
 
+// POST Save Trigger
 resourceSchema.post('save', (doc) => {
   console.log('%s - New Resource Created', doc._id);
+  // Find the project which this record refers to
   Project.findById(doc.project, (err, project) => {
     if (err) {
       throw err;
     } else {
+      // Add this resource to the projects.resources array
       console.log(`Adding resource to ${project.title}`);
+
       // Guard against null vlaue
       if (project.resources == null) {
         project.resources = [];
       }
+      // Does this ID already exist in the array?
       if (project.resources.indexOf(doc._id) === -1) {
         project.resources.push(doc._id);
       }
-      // TODO: Change to update to prevent multiple trigger fires
+      // Save the project with the updated .resources array.
       project.save((saveError, updatedProject) => {
         if (saveError) {
           throw saveError;
@@ -64,45 +67,7 @@ resourceSchema.post('save', (doc) => {
 });
 
 resourceSchema.post('remove', (doc) => {
-  // console.log('%s - Resource Deleted', doc);
-  // Project.find(doc.project, (err, project) => {
-  //   console.log(project);
-  //   const index = project.resources.indexOf(doc._id);
-  //
-  //   if(index !== -1) {
-  //     project.resources = project.resources.splice(index, 1);
-  //   }
-  //
-  //   project.save((saveError, updatedProject) => {
-  //     if (saveError) {
-  //       throw saveError;
-  //     } else {
-  //       console.log('Project successfully updated!');
-  //       console.log(updatedProject);
-  //     }
-  //   });
 
-  // TODO: Remove from project on delete
-  // if (err) {
-  //   throw err;
-  // } else {
-  //   console.log('Adding resource to ' + project.title);
-  //   // Guard against null vlaue
-  //   if(project.resources == null) {
-  //     project.resources = [];
-  //   }
-  //   project.resources.push(doc._id);
-  //   // TODO: Change to update to prevent multiple trigger fires
-  //   project.save((saveError, updatedProject) => {
-  //     if (saveError) {
-  //       throw saveError;
-  //     } else {
-  //       console.log('Project successfully updated!');
-  //       console.log(updatedProject);
-  //     }
-  //   });
-  // }
-  // });
 });
 
 const Resource = mongoose.model('Resource', resourceSchema);

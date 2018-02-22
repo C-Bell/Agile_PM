@@ -24,10 +24,12 @@ module.exports = {
     return new Promise(((resolve, reject) => {
       // console.log('Validating User:');
       // console.log(draftUser);
-      if (draftUser.first_name != ''
-           && draftUser.last_name != ''
+      if (draftUser.name != ''
             && draftUser.username != ''
-             && draftUser.password != '') {
+             && draftUser.password != ''
+                && draftUser.name != null
+                   && draftUser.username != null
+                    && draftUser.password != null) {
         // console.log('No fields are null!');
         resolve({ result: true });
       }
