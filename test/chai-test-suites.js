@@ -171,76 +171,112 @@ describe('API - Project Creation', () => {
  * Login auth on the Web is working as expected
  * AuthMiddleware is working as expected
  */
-// describe('Web Access Tests', () => {
-//   // Login is public so it should return 200 and the page content
-//   // projects is not public so it should return 401
-//   it('WEB - Server will only share public pages to unauthorised users', (done) => {
-//     // Request a publically available page without proper credentials
-//     chai.request(server)
-//       .get('/login')
-//       .end((err, res) => {
-//         res.should.have.status(200);
-//         // Check that our result is a 200
-//         done();
-//       });
-//
-//
-//     // Request a private page without proper credentials
-//     chai.request(server)
-//       .get('/projects')
-//       .end((err, res) => {
-//         res.should.have.status(401);
-//         // Check that our result is a 404
-//         done();
-//       });
-//   });
-// });
+describe('Web Access Tests', () => {
+  // Login is public so it should return 200 and the page content
+  // projects is not public so it should return 401
+  it('WEB - Server will only share public pages to unauthorised users', (done) => {
+    // Request a publically available page without proper credentials
+    chai.request(server)
+      .get('/login')
+      .end((err, res) => {
+        res.should.have.status(200);
+        // Check that our result is a 200
+        done();
+      });
+
+
+    // Request a private page without proper credentials
+    chai.request(server)
+      .get('/projects')
+      .end((err, res) => {
+        res.should.have.status(401);
+        // Check that our result is a 404
+        done();
+      });
+  });
+});
 
 /* Test Suite Three */
 /* Testing the security of our router by seeing if the API will leak data
  * Even if the user accessing doesn't have the right access level
  */
 
-// describe('API Access Tests', () => {
-//   // An admin should gain access to this data
-//   it('API - Request all users (Admin)', (done) => {
-//     // Request a publically available page without proper credentials
-//     const adminCredentials = {
-//       username: 'cmsbates',
-//       password: 'password',
-//     };
-//
-//     chai.request(server)
-//       .get('/api/users')
-//       .auth(adminCredentials.username, adminCredentials.password)
-//       .end((err, res) => {
-//         console.log(res.body);
-//         assert((res.body.success === true), 'Fetched successfully!');
-//         assert((res.body.executor === adminCredentials.username), 'Executor object matches!');
-//         // // Check that our result is a 200
-//         done();
-//       });
-//   });
-//   // A user should not gain access to this data
-//   it('API - Request all users (User)', (done) => {
-//     const userCredentials = {
-//       username: 'sampleuser',
-//       password: 'password',
-//     };
-//
-//     chai.request(server)
-//       .get('api/users')
-//       .auth(userCredentials.username, userCredentials.password)
-//       .end((err, res) => {
-//         // res.should.have.status(200);
-//         console.log(res);
-//         // res.should.have.status(200);
-//         // Check that our result is a 200
-//         done();
-//       });
-//   });
-// });
+describe('API Access Tests', () => {
+  // An admin should gain access to this data
+  it('API - Request all users (Admin)', (done) => {
+    // Request a publically available page without proper credentials
+    const adminCredentials = {
+      username: 'cmsbates',
+      password: 'password',
+    };
 
+    chai.request(server)
+      .get('/api/users')
+      .auth(adminCredentials.username, adminCredentials.password)
+      .end((err, res) => {
+        console.log(res.body);
+        assert((res.body.success === true), 'Fetched successfully!');
+        assert((res.body.executor === adminCredentials.username), 'Executor object matches!');
+        // // Check that our result is a 200
+        done();
+      });
+  });
+  // A user should not gain access to this data
+  it('API - Request all users (User)', (done) => {
+    const userCredentials = {
+      username: 'sampleuser',
+      password: 'password',
+    };
+
+    chai.request(server)
+      .get('api/users')
+      .auth(userCredentials.username, userCredentials.password)
+      .end((err, res) => {
+        // res.should.have.status(200);
+        console.log(res);
+        // res.should.have.status(200);
+        // Check that our result is a 200
+        done();
+      });
+  });
+});
+
+/* Test Suite Four */
+/* Ensuring our auth middleware is successfully handing out sessions and
+ * Authorising them on /login
+ */
+
+// // Web Routes Public Pages Test
+describe('Web Session Tests', () => {
+  it('WEB - User recieves an authorised session and can access /home', (done) => {
+    const adminCredentials = {
+      username: 'cmsbates',
+      password: 'password',
+    };
+
+    console.log('Sending valid credentials to /login');
+
+    // Guidance taken from : http://chaijs.com/plugins/chai-http/
+    agent
+      .post('/login')
+      .send(adminCredentials)
+      .then((res) => {
+        res.should.have.cookie('connect.sid');
+        // The `agent` now has the sessionid cookie saved, and will send it
+        // back to the server in the next request:
+        return agent.get('/home')
+          .then((res) => {
+            res.should.have.status(200);
+          });
+      });
+    done();
+  });
+});
+
+/* Test Suite Five */
+/* Ensuring our auth middleware is successfully handing out sessions and
+ * Authorising them on /login
+ */
 
 // Web Routes Public Pages Test
 describe('Web Session Tests', () => {
@@ -267,29 +303,116 @@ describe('Web Session Tests', () => {
           });
       });
   });
-  it('WEB - User does not recieve an authorised session and cannot access /home', (done) => {
+});
+
+/* Test Suite Five */
+/* Ensuring resources and deadlines can be added to a project
+ * Ensuring that the dependencies are all satisfied.
+ */
+
+// Add a Deadline to a Project
+describe('API Add Resource and Deadline to Project', () => {
+  it('API - Deadlines can be added to Project', (done) => {
     const adminCredentials = {
-      username: 'error',
-      password: 'error',
+      username: 'cmsbates',
+      password: 'password',
     };
 
-    console.log('Sending invalid credentials to /login');
+    const projectDetails = {
+      title: 'My First Project',
+      body: 'With an aim to build a project management system',
+      date: 'Mon Jan 29 2018 15:34:31 GMT+0000 (GMT)',
+    };
 
-    // Guidance taken from : http://chaijs.com/plugins/chai-http/
-    agent
-      .post('/login')
-      .send(adminCredentials)
-      .then((res) => {
-        // res.should.have.cookie('connect.sid');
-        // res.should.have.status(404);
-        // The `agent` now has the sessionid cookie saved, and will send it
-        // back to the server in the next request:
-        done();
-        // return agent.get('/home')
-        //   .then((res) => {
-        //     res.should.have.status(401);
-        //     done();
-        //   });
+    let projectID;
+
+    chai.request(server)
+    /* Create new Project with sample User */
+      .post('/api/projects/create')
+      .auth(adminCredentials.username, adminCredentials.password)
+      .send(projectDetails)
+      .end((err, res) => {
+      // Check the server responded as expected
+        res.should.have.status(200);
+        // Ensure the record returned has an ID
+        res.body.record.should.have.property('_id');
+        // Check that key input fields are exact matches with the response
+        projectID = res.body.record._id;
+        // console.log(`ID: ${res.body.record._id}`);
+        assert((res.body.record.title === projectDetails.title), 'Title is correct!');
+        assert((res.body.record.body === projectDetails.body), 'Body is correct!');
+
+        const deadlineDetails = {
+          projectid: projectID,
+          title: 'Calums Deadline',
+          datetime: 'Mon Jan 29 2018 15:34:31 GMT+0000 (GMT)',
+        };
+
+        /* Check that all dependencies have been updated on the user */
+        chai.request(server)
+          .post('/api/deadlines/create')
+          .auth(adminCredentials.username, adminCredentials.password)
+          .send(deadlineDetails)
+          .end((err, res) => {
+            console.log(res.body);
+            // Check the server responded as expected
+            res.should.have.status(200);
+            // Check that key input fields are exact matches with the response
+            done();
+          });
+      });
+  });
+
+  it('API - Resources can be added to a Project', (done) => {
+    const adminCredentials = {
+      username: 'cmsbates',
+      password: 'password',
+    };
+
+    const projectDetails = {
+      title: 'My First Project',
+      body: 'With an aim to build a project management system',
+      date: 'Mon Jan 29 2018 15:34:31 GMT+0000 (GMT)',
+    };
+
+    let projectID;
+
+    chai.request(server)
+    /* Create new Project with sample User */
+      .post('/api/projects/create')
+      .auth(adminCredentials.username, adminCredentials.password)
+      .send(projectDetails)
+      .end((err, res) => {
+      // Check the server responded as expected
+        res.should.have.status(200);
+        // Ensure the record returned has an ID
+        res.body.record.should.have.property('_id');
+        // Check that key input fields are exact matches with the response
+        projectID = res.body.record._id;
+        // console.log(`ID: ${res.body.record._id}`);
+        assert((res.body.record.title === projectDetails.title), 'Title is correct!');
+        assert((res.body.record.body === projectDetails.body), 'Body is correct!');
+
+        const resourceDetails = {
+          projectid: projectID,
+          name: 'Supercomputer #777',
+          desc: 'Hyper-speed computer based in London with 100 Gbp/s',
+          fromDate: 'Mon Jan 29 2018 15:34:31 GMT+0000 (GMT)',
+          toDate: 'Wed Jan 31 2018 15:34:31 GMT+0000 (GMT)',
+        };
+
+        /* Check that all dependencies have been updated on the user */
+        chai.request(server)
+          .post('/api/resources/create')
+          .auth(adminCredentials.username, adminCredentials.password)
+          .send(resourceDetails)
+          .end((err, res) => {
+            console.log(res.body);
+            // Check the server responded as expected
+            res.should.have.status(200);
+            // Check that key input fields are exact matches with the response
+            done();
+          });
       });
   });
 });

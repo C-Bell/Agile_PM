@@ -34,13 +34,14 @@ resourceSchema.pre('save', function (next) {
   next();
 });
 
-// POST Save Trigger
+// POST Save Trigger -
+/* Adds this resource to its parent project */
 resourceSchema.post('save', (doc) => {
   console.log('%s - New Resource Created', doc._id);
   // Find the project which this record refers to
   Project.findById(doc.project, (err, project) => {
     if (err) {
-      throw err;
+      console.log(err);
     } else {
       // Add this resource to the projects.resources array
       console.log(`Adding resource to ${project.title}`);

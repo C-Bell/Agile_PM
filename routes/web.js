@@ -30,6 +30,10 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
+/* --------------------------- Public Register POST Request ------------------------- */
+/* This route allows us to register a valid user */
+/* Which will in turn grant the user access to the whole app */
+
 app.post('/register', async (req, res) => {
   let isValidUser = false;
 
@@ -41,12 +45,11 @@ app.post('/register', async (req, res) => {
     projects: null,
   });
 
-  console.log('New User is: ');
-  console.log(newUser);
-
+  // Check if the input is valid
   isValidUser = await validator.user(newUser);
 
   console.log(`The result of the validation: ${isValidUser.result}`);
+
   if (isValidUser.result) {
     newUser.save((err, newUser) => {
       if (err) {
@@ -63,10 +66,13 @@ app.post('/register', async (req, res) => {
       }
     });
   } else {
+    // Return a human readable error to be rendered on the page
     res.status(400);
     res.send(isValidUser);
   }
 });
+
+/* ------------------------------------------------------------------------ */
 
 /* --------------------------- Login POST Request ------------------------- */
 /* This route allows us to get an authorised session if we are a valid user */
@@ -89,8 +95,9 @@ app.post('/login', (req, res) => {
         console.log('Sent!');
       } else {
         // Authorise this session
+        // This allows the user to access routes below the middleware layer
         req.session.Authed = true;
-        req.session.userID = user[0]._id; // TODO: Vulnerability
+        req.session.userID = user[0]._id;
         // console.log(req.session);
         // Send an OK status code for: Successfully executed
         res.sendStatus(200);
@@ -106,28 +113,36 @@ app.post('/login', (req, res) => {
 app.use(authMiddleware);
 /* ------------------------------------------------------------------- */
 
-
+/* --------------------------- Projects GET Request ------------------------- */
+/* This route allows us to get all projects available to us i.e associated with our account */
 app.get('/projects', async (req, res) => {
   const requester = req.session;
   const access = 'none';
   const result = await authenticateUser(requester, access);
   const projectRecords = [];
   if (!result.errorCode) {
+    // Does this user have any projects associated with it?
     if (result.projects != null && result.projects.length > 0) {
       for (let i = 0; i < result.projects.length; ++i) {
+        // If so, fetch each one and add it to our array
         projectRecords[i] = await helpers.getProject(result.projects[i]);
       }
-      console.log('SENDING RESULT');
+      // Return the array
       res.send(projectRecords);
     } else {
-      res.send(result);
+      // Return 'No Content'
+      res.send(204);
     }
   } else {
+    // Return the human readable auth error
     res.status(401);
     res.send(result);
   }
 });
 
+/* ------------------------------------------------------------------- */
+
+// Get this User Object
 app.get('/user', async (req, res) => {
   const requester = req.session;
   const access = 'none';
@@ -136,6 +151,7 @@ app.get('/user', async (req, res) => {
   res.send(result);
 });
 
+// Delete a project deadline/resource
 app.delete('/delete', async (req, res) => {
   const requester = req.session;
   const access = 'admin';
@@ -145,16 +161,12 @@ app.delete('/delete', async (req, res) => {
     Deadline.findOneAndRemove({ _id: req.body.id }, (err) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log(`Deadline ${req.body.id} deleted.`);
       }
     });
 
     Resource.findOneAndRemove({ _id: req.body.id }, (err) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log(`Resource ${req.body.id} deleted.`);
       }
     });
   } else {

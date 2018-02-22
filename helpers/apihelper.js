@@ -249,21 +249,21 @@ Output:
     });
   },
 
-  // TODO: Make Synchronous
+  /* getUserList */
+  // Returns a list of all users in the system
   getUserList: async () => {
     const userList = await fetchAllUsers();
-    // console.log(`Returning to main function : ${userList.length}`);
     return userList;
   },
 
 
-  // TODO: Complete
+  /* addProjectToUser */
+  // Adds a reference to a new project to a User object
   addProjectToUser: async (userID, projectID) => {
     return new Promise((resolve, reject) => {
-      // console.log(`Looking for: ${userID}`);
+      // Find a matching user
       User.find({ _id: userID }, (err, found) => {
         if (err || found[0] == null) {
-          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'Incorrect Password',
@@ -272,14 +272,12 @@ Output:
              'We did not recognise that username and password, please try again!',
           });
         } else {
-          // console.log(`Found: ${found}`);
+          // Check if the projects field is null
           if (found[0].projects == null) {
             found[0].projects = [];
           }
-          // console.log('User Found, Adding new Project!');
-          // console.log(found[0].projects);
+          // Push the new project to the users projects array.
           found[0].projects.push(projectID);
-          // console.log(found[0].projects);
           found[0].save((err, updatedProject) => {
             if (err) {
               resolve(err);
@@ -290,13 +288,13 @@ Output:
       });
     });
   },
-
+  /* removeProjectFromUser */
+  // Removes a reference of a project to a User object
+  // Usually in deletion of a project
   removeProjectFromUser: async (userID, projectID) => {
     return new Promise((resolve, reject) => {
-      // console.log(`Looking for: ${userID}`);
       User.find({ _id: userID }, (err, found) => {
         if (err || found[0] == null) {
-          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'Incorrect Password',
@@ -305,22 +303,18 @@ Output:
              'We did not recognise that username and password, please try again!',
           });
         } else {
-          // console.log(`Found: ${found}`);
           // If its a null value, set it to an array
           if (found[0].projects == null) {
             found[0].projects = [];
           }
 
-          // console.log('User Found, Removing Project ID!');
           for (let i = 0; i < found[0].projects.length; i++) {
-            // console.log(`${found[0].projects[i]} : ${projectID}`);
+            // If the project exists, remove it from the array
             if (found[0].projects[i] == projectID) {
-              // console.log(`Removing Project ${projectID}`);
               found[0].projects.splice(i, 1);
               break;
             }
           }
-
           found[0].save((err, updatedProject) => {
             if (err) {
               resolve(err);
@@ -332,12 +326,13 @@ Output:
     });
   },
 
+  /* removeProjectFromAllUsers */
+  // Removes a reference of a project from all User Objects
+  // Usually in deletion of a project
   removeProjectFromAllUsers: async (projectID) => {
     return new Promise((resolve, reject) => {
-      // console.log(`Looking for users with the project: ${projectID}`);
       User.find({ projects: projectID }, (err, found) => {
         if (err || found[0] == null) {
-          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'No Matching Users Found!',
@@ -346,21 +341,16 @@ Output:
              'We did not find any users associated with that project!',
           });
         } else {
-          // console.log(`Found: ${found}`);
-          // If its a null value, set it to an array
-
+          // Iterate over Users
           for (let i = 0; i < found.length; ++i) {
-            // console.log(found[i].name);
+            // If its a null value, set it to an array
             if (found[i].projects == null) {
               found[i].projects = [];
             }
-
+            // Iterate over this User's Projects
             for (let j = 0; j < found[i].projects.length; j++) {
-              // console.log(`${found[i].projects[j]} : ${projectID}`);
               if (found[i].projects[j].equals(projectID)) {
                 found[i].projects.splice(j, 1);
-                // console.log(found[i].projects);
-              } else {
               }
             }
 
@@ -368,8 +358,6 @@ Output:
               if (err) {
                 resolve(err);
               } else {
-                // console.log('Saved successfully: ');
-                // console.log(updatedProject);
               }
             });
           }

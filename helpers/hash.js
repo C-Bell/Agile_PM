@@ -1,4 +1,5 @@
 /* eslint prefer-const: off, no-bitwise: off */
+// Disables eslints prefer-const setting for this file.
 
 module.exports = {
 

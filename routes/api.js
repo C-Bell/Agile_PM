@@ -197,6 +197,7 @@ app.post('/deadlines/create', async (req, res) => {
   const requester = auth(req);
   const access = 'none';
   const result = await authenticateUser(requester, access);
+  console.log('Create Deadline');
   // console.log(result);
 
   if (!result.errorCode) {
@@ -381,16 +382,13 @@ app.delete('/resources/delete', async (req, res) => {
   const updateFields = req.body.updates;
   const reply = {};
 
-  // console.log(req.body);
 
   if (!result.errorCode) {
     Resource.find(req.body, (err, resourceToDelete) => {
       if (err || resourceToDelete[0] == null) {
         res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid deadline ID!' });
       } else {
-        // console.log(`Matching Records: ${resourceToDelete}`);
         resourceToDelete[0].remove();
-        // console.log(`${resourceToDelete[0]} deadline was successfully deleted!`);
         reply.executor = requester.name;
         reply.success = true;
         reply.record = resourceToDelete[0];
@@ -454,9 +452,6 @@ app.post('/projects/create', async (req, res) => {
     // Save our object in accordance to the Schema
     projectSchema.save(async (err, newProject) => {
       if (err) throw err;
-      // console.log('Project saved successfully!');
-      // Render the project page
-      // console.log(newProject);
 
       const success = await helpers.addProjectToUser(result._id, newProject._id);
       if (success != null) {
