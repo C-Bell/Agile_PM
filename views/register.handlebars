@@ -85,7 +85,7 @@ $(document).ready(function() {
         last_name: $("#lastname").val()
       },
       success: function(result) {
-        alert(JSON.stringify(result));
+        console.log(result);
         showError("", "");
         window.location = "/home";
       },

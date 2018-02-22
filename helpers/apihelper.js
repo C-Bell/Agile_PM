@@ -2,6 +2,7 @@ const Project = require('../models/project');
 const Deadline = require('../models/deadline');
 const Resource = require('../models/resource');
 const User = require('../models/user');
+const helpers = require('./hash');
 
 // Clean Array -
 // Input - An array with unpredicted null values
@@ -27,7 +28,6 @@ const fetchProject = async (projectID) => {
     if (projectID != null) {
       console.log(`Fetching Project: ${projectID}`);
       Project.findById(projectID, (err, project) => {
-        // console.log(project);
         resolve(project);
       });
     } else {
@@ -57,6 +57,9 @@ const fetchAllUsers = async () => {
 const fetchProjectUsers = async (projectID) => {
   return new Promise((resolve, reject) => {
     const users = User.find({ projects: projectID });
+    for (let i = 0; i < users.length; ++i) {
+      users[i].password = '';
+    }
     resolve(users);
   });
 };
@@ -123,8 +126,10 @@ Output:
 */
   authenticateUser: async (user, requiredAccess) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for: ${user}`);
-      User.find({ username: user.name, password: user.pass }, (err, found) => {
+      console.log(`Looking for: ${JSON.stringify(user)}`);
+      console.log(`Search Name: ${user.name}`);
+      console.log(`Search Password: ${helpers.hashCode(user.pass)}`);
+      User.find({ username: user.name, password: helpers.hashCode(user.pass) }, (err, found) => {
         if (err || found[0] == null) {
           console.log('Incorrect Password!');
           resolve({
@@ -132,10 +137,11 @@ Output:
             errorCode: 'Incorrect Password',
             // User friendly message
             errorMessage:
-              'We did not recognise that username and password, please try again!',
+            'We did not recognise that username and password, please try again!',
           });
-        } else if (found[0].type == requiredAccess || requiredAccess == 'none') {
+        } else if (found[0].type === requiredAccess || requiredAccess === 'none') {
           console.log('User Found, Correct Access!');
+          found[0].password = '';
           resolve(found[0]);
         } else {
           console.log('User Found, Incorrect Access!');
@@ -161,31 +167,29 @@ Output:
 */
   authenticateWebUser: async (user, requiredAccess) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for: ${user}`);
+      // console.log(`Looking for: ${JSON.stringify(user)}`);
       // Search against the ID
       User.find({ _id: user.userID }, (err, found) => {
         // Not Found -
         if (err || found[0] == null) {
-          console.log('UserID Not Found!');
+          // console.log('UserID Not Found!');
           resolve({
             responseCode: 401,
             errorCode: 'Incorrect Session ID',
             errorMessage:
               'We did not recognise that session ID, please try again!',
           });
+        }
+        if (found[0].type === requiredAccess || requiredAccess === 'none') {
+        //  console.log('User Found, Correct Access!');
+          resolve(found[0]);
         } else {
-          // Found and correct access
-          if (found[0].type == requiredAccess || requiredAccess == 'none') {
-            console.log('User Found, Correct Access!');
-            resolve(found[0]);
-          } else {
-            console.log('User Found, Incorrect Access!');
-            resolve({
-              responseCode: 401,
-              errorCode: 'Insufficient Privileges',
-              errorMessage: "You don't have access to perform this action!",
-            });
-          }
+        //  console.log('User Found, Incorrect Access!');
+          resolve({
+            responseCode: 401,
+            errorCode: 'Insufficient Privileges',
+            errorMessage: "You don't have access to perform this action!",
+          });
         }
       });
     });
@@ -211,31 +215,38 @@ Output:
       project.record = await fetchProject(objID).catch((err) => {
         console.log(err);
       });
-    }
-    /* Fetch Resource Records */
-    if (project.record.resources != null) {
-      for (let j = 0; j < project.record.resources.length; ++j) {
-        resourceObjs[j] = await fetchResource(project.record.resources[j]).catch((err) => {
-          console.log(err);
-        });
+      /* Fetch Resource Records */
+      if (project.record.resources != null) {
+        for (let j = 0; j < project.record.resources.length; ++j) {
+          resourceObjs[j] = await fetchResource(project.record.resources[j]).catch((err) => {
+            console.log(err);
+          });
+        }
+        /* Clean Resource Records */
+        project.resourceObjects = await cleanArray(resourceObjs);
       }
-      /* Clean Resource Records */
-      project.resourceObjects = await cleanArray(resourceObjs);
-    }
-    /* Fetch Deadline Records */
-    if (project.record.deadlines != null) {
-      for (let j = 0; j < project.record.deadlines.length; ++j) {
-        deadlineObjs[j] = await fetchDeadline(project.record.deadlines[j]).catch((err) => {
-          console.log(err);
-        });
+      /* Fetch Deadline Records */
+      if (project.record.deadlines != null) {
+        for (let j = 0; j < project.record.deadlines.length; ++j) {
+          deadlineObjs[j] = await fetchDeadline(project.record.deadlines[j]).catch((err) => {
+            console.log(err);
+          });
+        }
+        /* Clean Deadline Records */
+        project.deadlineObjects = await cleanArray(deadlineObjs);
       }
-      /* Clean Deadline Records */
-      project.deadlineObjects = await cleanArray(deadlineObjs);
-    }
-    /* Fetch User Records */
-    project.users = await fetchProjectUsers(project.record._id);
+      /* Fetch User Records */
+      project.users = await fetchProjectUsers(project.record._id);
 
-    return project;
+      return project;
+    }
+    return ({
+      responseCode: 404, // 404 Response Code - User not found
+      errorCode: 'Invalid ID',
+      // User friendly message
+      errorMessage:
+         'We did not recognise that project ID, please try again!',
+    });
   },
 
   // TODO: Make Synchronous
@@ -321,41 +332,51 @@ Output:
     });
   },
 
-  // TODO: Complete
-  // addUserToProject: async (userID, projectID) => {
-  //   return new Promise((resolve, reject) => {
-  //     console.log(`Looking for: ${projectID}`);
-  //           Project.findById(result.projects[i], function (err, project) {
-  //             if (err || found[0] == null) {
-  //               console.log("Project Not Found!");
-  //               resolve({
-  //                 responseCode: 404, // 404 Response Code - User not found
-  //                 errorCode: "Project Not Found",
-  //                 // User friendly message
-  //                 errorMessage:
-  //                   "We cannot find that project, please try again!"
-  //               });
-  //             } else {
-  //               let thisProject = found[0];
-  //               thisProject.
-  //             }
-  //           });
-  //         });
-  //       }
-};
+  removeProjectFromAllUsers: async (projectID) => {
+    return new Promise((resolve, reject) => {
+      console.log(`Looking for users with the project: ${projectID}`);
+      User.find({ projects: projectID }, (err, found) => {
+        if (err || found[0] == null) {
+          console.log('Incorrect Password!');
+          resolve({
+            responseCode: 404, // 404 Response Code - User not found
+            errorCode: 'No Matching Users Found!',
+            // User friendly message
+            errorMessage:
+             'We did not find any users associated with that project!',
+          });
+        } else {
+          console.log(`Found: ${found}`);
+          // If its a null value, set it to an array
 
-//       Project.findById(result.projects[i], function (err, project) {
-//         // TODO: Return resources and deadlines as projects
-//         console.log('Resources:');
-//         console.log(project.resources)
-//         // if(project.resources != null) {
-//         //   if(project.resources.length != 0) {
-//         //     let resources = [];
-//         //     for(let j = 0; j < project.resources.length; ++j) {
-//         //       console.log(project.resources[j]);
-//         //       Resource.findById(project.resources[j], function (err, resource) {
-//         //         console.log('Resource Found! : ' + resource);
-//         //         if(resource != null) {
-//         //           resources.push(resource);
-//         //         }
-//         //       });
+          for (let i = 0; i < found.length; ++i) {
+            console.log(found[i].name);
+            if (found[i].projects == null) {
+              found[i].projects = [];
+            }
+
+            for (let j = 0; j < found[i].projects.length; j++) {
+              console.log(`${found[i].projects[j]} : ${projectID}`);
+              if (found[i].projects[j].equals(projectID)) {
+                found[i].projects.splice(j, 1);
+                console.log(found[i].projects);
+              } else {
+              }
+            }
+
+            found[i].save((err, updatedProject) => {
+              if (err) {
+                resolve(err);
+              } else {
+                console.log('Saved successfully: ');
+                console.log(updatedProject);
+              }
+            });
+          }
+          resolve(found);
+        }
+      });
+    });
+  },
+
+};

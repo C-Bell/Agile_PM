@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+const helpers = require('../helpers/hash');
+
 const Schema = mongoose.Schema;
-
-
 
 // create a schema
 const userSchema = new Schema({
@@ -10,7 +10,7 @@ const userSchema = new Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   type: { type: String, required: true },
-  imgUrl: {type: String},
+  imgUrl: { type: String },
   team: String,
   created_at: Date,
   updated_at: Date,
@@ -19,19 +19,20 @@ const userSchema = new Schema({
 
 // ES6 Notation does not work in Mongoose
 // Mongoose is trying to rebind 'this' to the document
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function () {
   // get the current date
-  let currentDate = new Date();
+  const currentDate = new Date();
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
-
+  console.log('Pre Save Context: ');
+  console.log(this);
+  // Has this password already been hashed?
+  // this.password = helpers.hashCode(this.password);
   // if created_at doesn't exist, add to that field
   if (!this.created_at) {
     this.created_at = currentDate;
   }
-
-  next();
 });
 
 // the schema is useless so far

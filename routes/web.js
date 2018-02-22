@@ -14,6 +14,7 @@ const User = require('../models/user');
 const authMiddleware = require('../helpers/authMiddleware');
 const helpers = require('../helpers/apihelper');
 const validator = require('../helpers/validator');
+const hash = require('../helpers/hash');
 
 const authenticateUser = helpers.authenticateWebUser;
 
@@ -35,10 +36,13 @@ app.post('/register', async (req, res) => {
   const newUser = new User({
     name: `${req.body.first_name} ${req.body.last_name}`,
     username: req.body.username,
-    password: req.body.password,
+    password: hash.hashCode(req.body.password),
     type: 'user',
     projects: null,
   });
+
+  console.log('New User is: ');
+  console.log(newUser);
 
   isValidUser = await validator.user(newUser);
 
@@ -71,7 +75,7 @@ app.post('/login', (req, res) => {
   console.log('Web POST Login called.');
   console.log(req.body);
   User.find(
-    { username: req.body.username, password: req.body.password },
+    { username: req.body.username, password: hash.hashCode(req.body.password) },
     (err, user) => {
       if (err || user[0] == null) {
         res.status(404);
@@ -192,7 +196,7 @@ app.get('/projects/:pID', async (req, res) => {
   }
 });
 
-app.post('/projects/new', async (req, res) => {
+app.post('/projects/create', async (req, res) => {
   const requester = req.session;
   const access = 'none';
   const result = await authenticateUser(requester, access);

@@ -328,6 +328,7 @@ window.onclick = function(event) {
           console.log(JSON.stringify(result));
           document.getElementById("taskErrorCode").innerHTML = "";
           document.getElementById("taskErrorMessage").innerHTML = "";
+          window.location.reload();
         },
         error: function(result) {
           console.log(result);

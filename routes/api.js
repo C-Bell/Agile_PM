@@ -42,10 +42,18 @@ app.get('/users', async (req, res) => {
   const requester = auth(req);
   const access = 'none';
   const result = await authenticateUser(requester, access);
-  console.log(req.params);
+  const reply = {};
+  console.log(req.query);
   if (!result.errorCode) {
-    User.find({}, (err, users) => {
-      res.send(users);
+    User.find(req.query, (err, users) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      }
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = users;
+      res.send(reply);
     });
   } else {
     res.send(result);
@@ -56,6 +64,8 @@ app.post('/users/create', async (req, res) => {
   const requester = auth(req);
   const access = 'admin';
   const result = await authenticateUser(requester, access);
+  const reply = {};
+
   console.log(result);
   if (!result.errorCode) {
     const newUser = new User({
@@ -65,11 +75,14 @@ app.post('/users/create', async (req, res) => {
       type: req.body.type,
       projects: null,
     });
-
+    console.log(`Saving ${newUser.username}`);
     newUser.save((err, savedUser) => {
       if (err) throw err;
       console.log('User saved successfully!');
-      res.send(savedUser);
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = savedUser;
+      res.send(reply);
     });
   } else {
     res.send(result);
@@ -87,18 +100,16 @@ app.patch('/users/update', async (req, res) => {
   if (!result.errorCode) {
     User.findById(result._id, (err, userToUpdate) => {
       if (err || userToUpdate == null) {
-        console.log('cust error');
-        throw err;
         res.send({ responseCode: 204, errorCode: 'User Not Found', errorMessage: 'This is not a valid user ID!' });
       } else {
         userToUpdate.set(req.body.updateFields);
-        userToUpdate.save((err, updatedUser) => {
-          if (!err) { res.send(updatedUser); }
+        userToUpdate.save((saveErr, updatedUser) => {
+          if (!saveErr) { res.send(updatedUser); }
         });
       }
     });
   } else {
-    return result;
+    res.send(result);
   }
 });
 
@@ -127,6 +138,28 @@ app.delete('/users/delete', async (req, res) => {
 /*               DEADLINE ROUTES               */
 /*---------------------------------------------*/
 
+app.get('/deadlines', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  const result = await authenticateUser(requester, access);
+  const reply = {};
+  console.log(req.query);
+  if (!result.errorCode) {
+    Deadline.find(req.query, (err, deadlines) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      }
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = deadlines;
+      res.send(reply);
+    });
+  } else {
+    res.send(result);
+  }
+});
+
 app.post('/deadlines/create', async (req, res) => {
   const requester = auth(req);
   const access = 'admin';
@@ -150,12 +183,39 @@ app.post('/deadlines/create', async (req, res) => {
   }
 });
 
+// TODO: Fix the trigger fire on Project
+app.patch('/deadlines/update', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const id = req.body.deadlineID;
+  const updateFields = req.body.updates;
+  console.log(req.body);
+  if (!result.errorCode) {
+    console.log('No errorcode');
+    Deadline.findById(id, (err, deadlineToUpdate) => {
+      if (err || deadlineToUpdate == null) {
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid resource ID!' });
+        throw err;
+      } else {
+        deadlineToUpdate.set(req.body.updateFields);
+        deadlineToUpdate.save((saveErr, updatedDeadline) => {
+          console.log(`Resource created${updatedDeadline}`);
+          if (!saveErr) { res.send(updatedDeadline); }
+        });
+      }
+    });
+  } else {
+    res.send(result);
+  }
+});
+
 
 app.delete('/deadlines/delete', async (req, res) => {
   const requester = auth(req);
   const access = 'admin';
   const result = await authenticateUser(requester, access);
-  const id = req.body.deadlineID;
+  // const id = req.body.deadlineID;
   const updateFields = req.body.updates;
   const reply = {};
 
@@ -175,13 +235,35 @@ app.delete('/deadlines/delete', async (req, res) => {
       }
     });
   } else {
-    return result;
+    res.send(result);
   }
 });
 
 /*---------------------------------------------*/
 /*               RESOURCE ROUTES               */
 /*---------------------------------------------*/
+
+app.get('/resources', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  const result = await authenticateUser(requester, access);
+  const reply = {};
+  console.log(req.query);
+  if (!result.errorCode) {
+    Resource.find(req.query, (err, resources) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      }
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = resources;
+      res.send(reply);
+    });
+  } else {
+    res.send(result);
+  }
+});
 
 app.post('/resources/create', async (req, res) => {
   const requester = auth(req);
@@ -229,7 +311,7 @@ app.patch('/resources/update', async (req, res) => {
       }
     });
   } else {
-    return result;
+    res.send(result);
   }
 });
 
@@ -257,7 +339,7 @@ app.delete('/resources/delete', async (req, res) => {
       }
     });
   } else {
-    return result;
+    res.send(result);
   }
 });
 
@@ -265,12 +347,40 @@ app.delete('/resources/delete', async (req, res) => {
 /*                 PROJECT ROUTES              */
 /*---------------------------------------------*/
 
+app.get('/projects', async (req, res) => {
+  const requester = auth(req);
+  const access = 'none';
+  console.log(requester);
+  const result = await authenticateUser(requester, access);
+  const reply = {};
+  const projectRecords = [];
+  if (!result.errorCode) {
+    Project.find(req.query, async (err, resources) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      }
+      for (let i = 0; i < resources.length; ++i) {
+        projectRecords[i] = await helpers.getProject(resources[i]);
+        projectRecords[i].password = '';
+      }
+      reply.executor = requester.name;
+      reply.success = true;
+      reply.record = projectRecords;
+      res.status(200);
+      res.send(reply);
+    });
+  } else {
+    res.send(result);
+  }
+});
+
 app.post('/projects/create', async (req, res) => {
   const requester = auth(req);
   const access = 'admin';
   const result = await authenticateUser(requester, access);
 
-  if (!result.error) {
+  if (!result.errorCode) {
     // Build our object in accordance to the Schema
     const projectSchema = new Project({
       owner: result._id,
@@ -282,78 +392,75 @@ app.post('/projects/create', async (req, res) => {
     });
 
     // Save our object in accordance to the Schema
-    projectSchema.save((err, newProject) => {
+    projectSchema.save(async (err, newProject) => {
       if (err) throw err;
       console.log('Project saved successfully!');
       // Render the project page
       console.log(newProject);
-      res.send(newProject);
+
+      const success = await helpers.addProjectToUser(result._id, newProject._id);
+      if (success != null) {
+        res.send(success);
+      }
     });
   } else {
     res.send(result);
   }
 });
 
-// app.get("/projects", async (req, res) => {
-//   let requester = auth(req);
-//   let access = "none";
-//   console.log(requester);
-//   let result = await authenticateUser(requester, access);
-//   let resultObj = {};
-//   if (!result.error) {
-//     helpers.getProjects(result.projects).then((projects) => {
-//       console.log(projects);
-//     })
-//     // resultObj.numberOfRecords = projects.length;
-//     // resultObj.executor = { "username" : result.username};
-//     // res.send(resultObj);
-//   } else {
-//     res.send(result);
-//   }
-// });
+app.patch('/projects/update', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const id = req.body.projectId;
+  const updateFields = req.body.updates;
+  console.log(req.body);
+  if (!result.errorCode) {
+    console.log('No errorcode');
+    Project.findById(id, (err, projectToUpdate) => {
+      if (err || projectToUpdate == null) {
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid resource ID!' });
+        throw err;
+      } else {
+        projectToUpdate.set(req.body.updateFields);
+        projectToUpdate.save((saveErr, updatedProject) => {
+          console.log(`Project created ${updatedProject}`);
+          if (!saveErr) { res.send(updatedProject); }
+        });
+      }
+    });
+  } else {
+    res.send(result);
+  }
+});
 
-// app.get("/projects", async (req, res) => {
-//   let requester = auth(req);
-//   let access = "none";
-//   let result = await authenticateUser(requester, access);
-//   let projects = [];
-//   let resultObj = {};
-//   if (!result.error) {
-//     for(let i = 0; i < result.projects.length; ++i) {
-//       Project.findById(result.projects[i], function (err, project) {
-//         // TODO: Return resources and deadlines as projects
-//         console.log('Resources:');
-//         console.log(project.resources)
-//         // if(project.resources != null) {
-//         //   if(project.resources.length != 0) {
-//         //     let resources = [];
-//         //     for(let j = 0; j < project.resources.length; ++j) {
-//         //       console.log(project.resources[j]);
-//         //       Resource.findById(project.resources[j], function (err, resource) {
-//         //         console.log('Resource Found! : ' + resource);
-//         //         if(resource != null) {
-//         //           resources.push(resource);
-//         //         }
-//         //       });
-//         //     }
-//         //     console.log('ALL resources');
-//         //     console.log(resources);
-//         //     project.resourceObjs = resources;
-//         //
-//         // }
-//
-//         projects.push(project);
-//         if(i == (result.projects.length-1)) {
-//           resultObj.user = {"id" : result._id, "username" : result.username};
-//           resultObj.numberOfResults = projects.length;
-//           resultObj.projects = projects;
-//           res.send(resultObj);
-//         }
-//       });
-//     }
-//   } else {
-//     res.send(result);
-//   }
-// });
+app.delete('/projects/delete', async (req, res) => {
+  const requester = auth(req);
+  const access = 'admin';
+  const result = await authenticateUser(requester, access);
+  const reply = {};
+
+  console.log(req.body);
+
+  if (!result.errorCode) {
+    Project.find(req.body, async (err, projectToDelete) => {
+      if (err || projectToDelete[0] == null) {
+        res.send({ responseCode: 204, errorCode: 'Record Not Found', errorMessage: 'This is not a valid deadline ID!' });
+      } else {
+        console.log(`Matching Records: ${projectToDelete}`);
+        projectToDelete[0].remove();
+        console.log(`${projectToDelete[0]} deadline was successfully deleted!`);
+        reply.executor = requester.name;
+        reply.success = true;
+        reply.record = projectToDelete[0];
+        reply.usersEffected = await helpers.removeProjectFromAllUsers(projectToDelete[0]._id);
+        res.send(reply);
+      }
+    });
+  } else {
+    res.send(result);
+  }
+});
+
 
 module.exports = app;
