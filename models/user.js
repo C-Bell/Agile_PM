@@ -25,8 +25,8 @@ userSchema.pre('save', function () {
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
-  console.log('Pre Save Context: ');
-  console.log(this);
+  // console.log('Pre Save Context: ');
+  // console.log(this);
   // Has this password already been hashed?
   // this.password = helpers.hashCode(this.password);
   // if created_at doesn't exist, add to that field

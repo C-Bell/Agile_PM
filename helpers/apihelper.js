@@ -26,7 +26,7 @@ const cleanArray = async (actual) => {
 const fetchProject = async (projectID) => {
   return new Promise((resolve, reject) => {
     if (projectID != null) {
-      console.log(`Fetching Project: ${projectID}`);
+      // console.log(`Fetching Project: ${projectID}`);
       Project.findById(projectID, (err, project) => {
         resolve(project);
       });
@@ -44,7 +44,7 @@ const fetchProject = async (projectID) => {
 const fetchAllUsers = async () => {
   new Promise((resolve, reject) => {
     User.find({}, async (err, users) => {
-      console.log(`${users.length} users found!`);
+      // console.log(`${users.length} users found!`);
       resolve(users);
     });
   });
@@ -71,10 +71,10 @@ const fetchProjectUsers = async (projectID) => {
 const fetchResource = async (resourceID) => {
   return new Promise((resolve, reject) => {
     if (resourceID != null) {
-      console.log(`Fetching Resource: ${resourceID}`);
+      // console.log(`Fetching Resource: ${resourceID}`);
       Resource.findById(resourceID, (err, resource) => {
         if (resource != null) {
-          console.log(resource);
+          // console.log(resource);
           resolve(resource);
         } else {
           reject(resource);
@@ -94,11 +94,11 @@ const fetchResource = async (resourceID) => {
 const fetchDeadline = async (deadlineID) => {
   return new Promise((resolve, reject) => {
     if (deadlineID != null) {
-      console.log(`Fetching Deadline: ${deadlineID}`);
+      // console.log(`Fetching Deadline: ${deadlineID}`);
       Deadline.findById(deadlineID, (err, deadline) => {
         if (deadline != null) {
-          console.log('Deadline Found!');
-          console.log(deadline);
+          // console.log('Deadline Found!');
+          // console.log(deadline);
           resolve(deadline);
         } else {
           reject(deadline);
@@ -126,12 +126,12 @@ Output:
 */
   authenticateUser: async (user, requiredAccess) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for: ${JSON.stringify(user)}`);
-      console.log(`Search Name: ${user.name}`);
-      console.log(`Search Password: ${helpers.hashCode(user.pass)}`);
+      // console.log(`Looking for: ${JSON.stringify(user)}`);
+      // console.log(`Search Name: ${user.name}`);
+      // console.log(`Search Password: ${helpers.hashCode(user.pass)}`);
       User.find({ username: user.name, password: helpers.hashCode(user.pass) }, (err, found) => {
         if (err || found[0] == null) {
-          console.log('Incorrect Password!');
+          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'Incorrect Password',
@@ -140,11 +140,11 @@ Output:
             'We did not recognise that username and password, please try again!',
           });
         } else if (found[0].type === requiredAccess || requiredAccess === 'none') {
-          console.log('User Found, Correct Access!');
+          // console.log('User Found, Correct Access!');
           found[0].password = '';
           resolve(found[0]);
         } else {
-          console.log('User Found, Incorrect Access!');
+          // console.log('User Found, Incorrect Access!');
           resolve({
             responseCode: 401, // 401 Response Code - Insufficient Access
             errorCode: 'Insufficient Privileges',
@@ -167,12 +167,12 @@ Output:
 */
   authenticateWebUser: async (user, requiredAccess) => {
     return new Promise((resolve, reject) => {
-      // console.log(`Looking for: ${JSON.stringify(user)}`);
+      // //console.log(`Looking for: ${JSON.stringify(user)}`);
       // Search against the ID
       User.find({ _id: user.userID }, (err, found) => {
         // Not Found -
         if (err || found[0] == null) {
-          // console.log('UserID Not Found!');
+          // //console.log('UserID Not Found!');
           resolve({
             responseCode: 401,
             errorCode: 'Incorrect Session ID',
@@ -181,10 +181,10 @@ Output:
           });
         }
         if (found[0].type === requiredAccess || requiredAccess === 'none') {
-        //  console.log('User Found, Correct Access!');
+        //  //console.log('User Found, Correct Access!');
           resolve(found[0]);
         } else {
-        //  console.log('User Found, Incorrect Access!');
+        //  //console.log('User Found, Incorrect Access!');
           resolve({
             responseCode: 401,
             errorCode: 'Insufficient Privileges',
@@ -208,18 +208,18 @@ Output:
     const resourceObjs = []; // Holds this projects Resources
     const deadlineObjs = []; // Hold this projects Deadlines
     const project = {}; // Holds this project
-    console.log('GetProject Called!');
-    console.log('Input: ');
-    // console.log(objID);
+    // console.log('GetProject Called!');
+    // console.log('Input: ');
+    // //console.log(objID);
     if (objID != null) {
       project.record = await fetchProject(objID).catch((err) => {
-        console.log(err);
+        // console.log(err);
       });
       /* Fetch Resource Records */
       if (project.record.resources != null) {
         for (let j = 0; j < project.record.resources.length; ++j) {
           resourceObjs[j] = await fetchResource(project.record.resources[j]).catch((err) => {
-            console.log(err);
+            // console.log(err);
           });
         }
         /* Clean Resource Records */
@@ -229,7 +229,7 @@ Output:
       if (project.record.deadlines != null) {
         for (let j = 0; j < project.record.deadlines.length; ++j) {
           deadlineObjs[j] = await fetchDeadline(project.record.deadlines[j]).catch((err) => {
-            console.log(err);
+            // console.log(err);
           });
         }
         /* Clean Deadline Records */
@@ -252,7 +252,7 @@ Output:
   // TODO: Make Synchronous
   getUserList: async () => {
     const userList = await fetchAllUsers();
-    console.log(`Returning to main function : ${userList.length}`);
+    // console.log(`Returning to main function : ${userList.length}`);
     return userList;
   },
 
@@ -260,10 +260,10 @@ Output:
   // TODO: Complete
   addProjectToUser: async (userID, projectID) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for: ${userID}`);
+      // console.log(`Looking for: ${userID}`);
       User.find({ _id: userID }, (err, found) => {
         if (err || found[0] == null) {
-          console.log('Incorrect Password!');
+          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'Incorrect Password',
@@ -272,14 +272,14 @@ Output:
              'We did not recognise that username and password, please try again!',
           });
         } else {
-          console.log(`Found: ${found}`);
+          // console.log(`Found: ${found}`);
           if (found[0].projects == null) {
             found[0].projects = [];
           }
-          console.log('User Found, Adding new Project!');
-          console.log(found[0].projects);
+          // console.log('User Found, Adding new Project!');
+          // console.log(found[0].projects);
           found[0].projects.push(projectID);
-          console.log(found[0].projects);
+          // console.log(found[0].projects);
           found[0].save((err, updatedProject) => {
             if (err) {
               resolve(err);
@@ -293,10 +293,10 @@ Output:
 
   removeProjectFromUser: async (userID, projectID) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for: ${userID}`);
+      // console.log(`Looking for: ${userID}`);
       User.find({ _id: userID }, (err, found) => {
         if (err || found[0] == null) {
-          console.log('Incorrect Password!');
+          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'Incorrect Password',
@@ -305,17 +305,17 @@ Output:
              'We did not recognise that username and password, please try again!',
           });
         } else {
-          console.log(`Found: ${found}`);
+          // console.log(`Found: ${found}`);
           // If its a null value, set it to an array
           if (found[0].projects == null) {
             found[0].projects = [];
           }
 
-          console.log('User Found, Removing Project ID!');
+          // console.log('User Found, Removing Project ID!');
           for (let i = 0; i < found[0].projects.length; i++) {
-            console.log(`${found[0].projects[i]} : ${projectID}`);
+            // console.log(`${found[0].projects[i]} : ${projectID}`);
             if (found[0].projects[i] == projectID) {
-              console.log(`Removing Project ${projectID}`);
+              // console.log(`Removing Project ${projectID}`);
               found[0].projects.splice(i, 1);
               break;
             }
@@ -334,10 +334,10 @@ Output:
 
   removeProjectFromAllUsers: async (projectID) => {
     return new Promise((resolve, reject) => {
-      console.log(`Looking for users with the project: ${projectID}`);
+      // console.log(`Looking for users with the project: ${projectID}`);
       User.find({ projects: projectID }, (err, found) => {
         if (err || found[0] == null) {
-          console.log('Incorrect Password!');
+          // console.log('Incorrect Password!');
           resolve({
             responseCode: 404, // 404 Response Code - User not found
             errorCode: 'No Matching Users Found!',
@@ -346,20 +346,20 @@ Output:
              'We did not find any users associated with that project!',
           });
         } else {
-          console.log(`Found: ${found}`);
+          // console.log(`Found: ${found}`);
           // If its a null value, set it to an array
 
           for (let i = 0; i < found.length; ++i) {
-            console.log(found[i].name);
+            // console.log(found[i].name);
             if (found[i].projects == null) {
               found[i].projects = [];
             }
 
             for (let j = 0; j < found[i].projects.length; j++) {
-              console.log(`${found[i].projects[j]} : ${projectID}`);
+              // console.log(`${found[i].projects[j]} : ${projectID}`);
               if (found[i].projects[j].equals(projectID)) {
                 found[i].projects.splice(j, 1);
-                console.log(found[i].projects);
+                // console.log(found[i].projects);
               } else {
               }
             }
@@ -368,8 +368,8 @@ Output:
               if (err) {
                 resolve(err);
               } else {
-                console.log('Saved successfully: ');
-                console.log(updatedProject);
+                // console.log('Saved successfully: ');
+                // console.log(updatedProject);
               }
             });
           }
