@@ -78,13 +78,15 @@ app.post('/login', (req, res) => {
     { username: req.body.username, password: hash.hashCode(req.body.password) },
     (err, user) => {
       if (err || user[0] == null) {
+        console.log('Not Valid User!');
         res.status(404);
         res.send({
-          responseCode: 401,
+          responseCode: 404,
           errorCode: 'Incorrect Password',
           errorMessage:
             'We did not recognise that username and password, please try again!',
         });
+        console.log('Sent!');
       } else {
         // Authorise this session
         req.session.Authed = true;
