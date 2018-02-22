@@ -411,6 +411,7 @@ app.get('/search', async (req, res) => {
   const access = 'none';
   const result = await authenticateUser(requester, access);
   delete result.password;
+  // Render the value of result into the page as 'user'
   res.render('search', {
     user: result, // Pass the current logged in user into the page for rendering.
   });
@@ -421,6 +422,7 @@ app.get('/', async (req, res) => {
   const access = 'none';
   const result = await authenticateUser(requester, access);
   delete result.password;
+  // Render the value of result into the page as 'user'
   res.render('home', {
     user: result,
   });
@@ -441,6 +443,7 @@ app.get('/newprojects', async (req, res) => {
   const access = 'none';
   const result = await authenticateUser(requester, access);
   delete result.password;
+  // Render the value of result into the page as 'user'
   res.render('newproject', {
     user: result,
   });
@@ -451,6 +454,7 @@ app.get('/home', async (req, res) => {
   const access = 'none';
   const result = await authenticateUser(requester, access);
   delete result.password;
+  // Render the value of result into the page as 'user'
   res.render('home', {
     user: result,
   });

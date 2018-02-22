@@ -8,6 +8,7 @@ const userSchema = new Schema({
   name: { type: String },
   desc: { type: String },
   username: { type: String, required: true, unique: true },
+  // Password Select: False protects the field from ever being extracted from the db
   password: { type: String, required: true, select: false },
   type: { type: String, required: true },
   imgUrl: { type: String },
@@ -25,10 +26,7 @@ userSchema.pre('save', function () {
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
-  // console.log('Pre Save Context: ');
-  // console.log(this);
-  // Has this password already been hashed?
-  // this.password = helpers.hashCode(this.password);
+
   // if created_at doesn't exist, add to that field
   if (!this.created_at) {
     this.created_at = currentDate;
