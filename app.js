@@ -20,7 +20,6 @@ mongoose.connect('mongodb://localhost/myappdatabase');
 const store = new MongoDBStore({
   uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
   collection: 'mySessions',
-});
 
 // Store Error Listener
 store.on('error', (error) => {
