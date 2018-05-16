@@ -1,3 +1,5 @@
+const User = require('../models/user');
+const hash = require('../helpers/hash');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../app');
@@ -10,6 +12,30 @@ const agent = chai.request.agent(server);
 
 chai.use(chaiHttp);
 
+/* NOTE! In order to run these tests, the following user must exist:
+{
+username: 'cmsbates',
+password: 'password',
+type: 'admin'
+}
+*/
+
+const newUser = new User({
+  name: 'Chris Bates',
+  username: 'cmsbates',
+  password: hash.hashCode('password'),
+  type: 'admin',
+  projects: null,
+});
+// Is this a valid user object?
+// Returns either {result : true} or a human readable error.
+
+/* newUser.save((err, savedUser) => {
+  if (err) throw err;
+  console.log(savedUser);
+  return savedUser;
+});
+
 // Example test to ensure the server is running and the test suite is working.
 it('Server returns status 200', (done) => {
   chai.request(server)
@@ -18,7 +44,7 @@ it('Server returns status 200', (done) => {
       res.should.have.status(200);
       done();
     });
-});
+}); */
 
 /* Test Suite One */
 /* Testing account creation on valid/invalid and admin/nonadmin accounts.
@@ -311,7 +337,7 @@ describe('Web Session Tests', () => {
  */
 
 // Add a Deadline to a Project
-describe('API Add Resource and Deadline to Project', () => {
+describe('API Add Deadline to Project', () => {
   it('API - Deadlines can be added to Project', (done) => {
     const adminCredentials = {
       username: 'cmsbates',
