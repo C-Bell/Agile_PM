@@ -9,19 +9,19 @@ const Project = require('./project');
 const resourceSchema = new Schema({
   project: {
     type: Schema.ObjectId,
-    ref: 'Project'
+    ref: 'Project',
   },
-  name: String,
-  desc: String,
+  name: { type: String, required: true },
+  desc: { type: String, required: true },
+  fromDate: Date,
+  toDate: Date,
   created_at: Date,
   updated_at: Date,
 });
 
 resourceSchema.pre('save', function (next) {
-  // TODO: Validation Set-up
-
   // get the current date
-  let currentDate = new Date();
+  const currentDate = new Date();
 
   // change the updated_at field to current date
   this.updated_at = currentDate;
@@ -34,19 +34,27 @@ resourceSchema.pre('save', function (next) {
   next();
 });
 
-resourceSchema.post('save', function (doc) {
+// POST Save Trigger -
+/* Adds this resource to its parent project */
+resourceSchema.post('save', (doc) => {
   console.log('%s - New Resource Created', doc._id);
+  // Find the project which this record refers to
   Project.findById(doc.project, (err, project) => {
     if (err) {
-      throw err;
+      console.log(err);
     } else {
-      console.log('Adding resource to ' + project.title);
+      // Add this resource to the projects.resources array
+      console.log(`Adding resource to ${project.title}`);
+
       // Guard against null vlaue
-      if(project.resources == null) {
+      if (project.resources == null) {
         project.resources = [];
       }
-      project.resources.push(doc._id);
-      // TODO: Change to update to prevent multiple trigger fires
+      // Does this ID already exist in the array?
+      if (project.resources.indexOf(doc._id) === -1) {
+        project.resources.push(doc._id);
+      }
+      // Save the project with the updated .resources array.
       project.save((saveError, updatedProject) => {
         if (saveError) {
           throw saveError;
@@ -57,6 +65,10 @@ resourceSchema.post('save', function (doc) {
       });
     }
   });
+});
+
+resourceSchema.post('remove', (doc) => {
+
 });
 
 const Resource = mongoose.model('Resource', resourceSchema);

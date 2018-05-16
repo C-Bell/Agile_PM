@@ -1,0 +1,256 @@
+<header>
+  <div class="container">
+  <div class="row align-items-center">
+    <div class="col-4">
+      <img width="100px" src="/images/PM_Icon.jpg"/>
+    </div>
+    <div class="col-4">
+      <h3 style="text-align: center;"> Agility PM </h3>
+    </div>
+    <div class="col-4 usertitle">
+      <a href="/home">Hi <span id="username">{{user.name}}</span></a>
+    </div>
+  </div>
+  </div>
+</header>
+<header class="subheader">
+  <div class="container">
+  <div class="row align-items-center">
+    <div class="col-3">
+    </div>
+    <div class="col-6" style="text-align: center;">
+      <a style="color: white" href="/home">Home |</a>
+      <a style="color: white" href="/newprojects">New Projects |</a>
+      <a style="color: white" href="/search">Search | </a>
+      <a style="color: white" href="/logout">Logout</a>
+    </div>
+    </div>
+  </div>
+</header/>
+
+<div class="container">
+<div class="login-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>{{project.title}}</h3>
+          <div class="container" id=""></div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Tasks</h3>
+          <div class="container" id="deadlines">
+            {{#each deadlines}}
+              <div class="subcard" data="deadline" id="{{this._id}}">
+                <div class="row">
+                  <div class="col-8">
+                    <h5>{{this.title}} - ({{this.status}})</h5>
+                    <p>{{this.datetime}}</p>
+                  </div>
+                  <div class="col-4">
+                    <span id="{{this._id}}" class="close">&times;</span>
+                  </div>
+                  <div class="col-12 center">
+                    <span id="{{this._id}}" class="taskState">To Do</span>
+                    <span id="{{this._id}}" class="taskState">In Progress</span>
+                    <span id="{{this._id}}" class="taskState">Done</span>
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+            <div class="add-box" id="newdeadline">
+              Add New Task
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Resources</h3>
+          <div class="container" id="deadlines">
+            {{#each resources}}
+              <div class="subcard" data="resource" id="{{this._id}}">
+                <div class="row">
+                  <div class="col-8">
+                  <h6>{{this.name}}</h6>
+                  <p>{{this.desc}}</p>
+                </div>
+                <div class="col-4">
+                  <span id="{{this._id}}" class="close">&times;</span>
+                </div>
+                <div class="col-12">
+                <div>From: {{this.fromDate}}</div>
+                <div>To: {{this.toDate}}</div>
+                </div>
+                </div>
+              </div>
+            {{/each}}
+            <div class="add-box" id="newresource">
+              Add New Resource
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="card-padding bottom-padding">
+  <div class="container">
+      <div>
+        <div class="row card align-items-center">
+          <h3>Users</h3>
+          <div class="col-12" id="deadlines">
+            {{#each users}}
+              <div class="subcard">
+                <div class="row">
+                  <div class="col-9">
+                  <h6>{{this.name}}</h6>
+                  <p>{{this.username}}</p>
+                </div>
+                <div class ="col-3">
+                  <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
+                  <span id="{{this._id}}" class="remove">&times;</span>
+                </div>
+                </div>
+              </div>
+            {{/each}}
+            <div class="add-box" id="newuser">
+              Add New User
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div>
+      <a/>
+    </div>
+    <div>
+      <div>
+        <div/>
+      </div>
+    </div>
+    <div >
+      <a>By Calum Bell</a>
+    </div>
+  </div>
+</footer>
+
+<div id="deadlineModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="deadlineClose" class="modal-exit">&times;</span>
+    <div class="row align-items-center centre">
+      <div class="container">
+        <h3> New Task </h3>
+            <div class="row centre">
+              <div class="col-12" style="padding-right: 3px;">
+                <label>Title: </label>
+                <input type="text" id="deadlinetitle" placeholder="Sample" name="uname" required>
+              </div>
+              <div class="col-12">
+                <label>Deadline: </label>
+                <input type="date" id="deadlinedate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <button type="button" id="createDeadline" class="button-green">Create</button>
+              </div>
+            </div>
+            <div class="error">
+              <h7 id="taskErrorCode"></h7>
+              <i><h8 id="taskErrorMessage"></h8></i>
+            </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="resourceModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="resourceClose" class="modal-exit">&times;</span>
+    <div class="row align-items-center centre">
+      <div class="container">
+        <h3> New Resource </h3>
+            <div class="row centre">
+              <div class="col-12" style="padding-right: 3px;">
+                <label>Title: </label>
+                <input type="text" id="resourcetitle" placeholder="Sample" name="uname" required>
+              </div>
+              <div class="col-12">
+                <label>Desc: </label>
+                <input type="text" id="resourcedesc" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <label>Start Date: </label>
+                <input type="date" id="resourcefromdate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <label>End Date: </label>
+                <input type="date" id="resourcetodate" placeholder="" name="desc" required>
+              </div>
+              <div class="col-12">
+                <button type="button" id="createResource" class="button-green">Create</button>
+              </div>
+              <div class="col-12">
+                <div class="error">
+                  <h7 id="resourceErrorCode"></h7>
+                  <i><h8 id="resourceErrorMessage"></h8></i>
+                </div>
+              </div>
+            </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="userModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="userClose" class="modal-exit">&times;</span>
+    <h3 class="center">New User</h3>
+    <div class="error">
+      <h7 id="userErrorCode"></h7>
+      <i><h8 id="userErrorMessage"></h8></i>
+    </div>
+    {{#each allUsers}}
+      <div class="subcard">
+        <div class="row">
+          <div class="col-9">
+          <h6>{{this.name}}</h6>
+          <p>{{this.username}}</p>
+        </div>
+        <div class="col-3">
+          <img width="50px" src="https://stroops.com/wp-content/uploads/2016/11/placeholder-profile-male-500x500.png"/>
+          <span id="{{this._id}}" class="add">&#43;</span>
+        </div>
+        <div class="col-12">
+        </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+</div>
+</div>
+
+<script src="/javascripts/project-page.js"></script>

@@ -1,0 +1,108 @@
+<header>
+  <div class="container">
+  <div class="row align-items-center">
+    <div class="col-4">
+      <img width="100px" src="/images/PM_Icon.jpg"/>
+    </div>
+    <div class="col-4">
+      <h3 style="text-align: center;"> Agility PM </h3>
+    </div>
+    <div class="col-4 usertitle">
+      <a href="/home">Hi <span id="username">{{user.name}}</span></a>
+    </div>
+  </div>
+  </div>
+</header>
+<header class="subheader">
+  <div class="container">
+  <div class="row align-items-center">
+    <div class="col-3">
+    </div>
+    <div class="col-6" style="text-align: center;">
+      <a style="color: white" href="/home">Home | </a>
+      <a style="color: white" href="/newprojects">New Projects |</a>
+      <a style="color: white" href="/logout">Logout</a>
+    </div>
+    </div>
+  </div>
+</header/>
+
+<div class="container">
+  <div class="login-padding" style="padding-top: 10%">
+    <div class="container">
+        <div>
+          <div class="row card align-items-center">
+            <h3> Search </h3>
+            <div class="container">
+                  <div class="row centre">
+                    <div class="col-12" style="padding-right: 3px;">
+                      <label>Search: </label>
+                      <input type="text" id="searchInput" placeholder="My First Project" name="project" required>
+                    </div>
+                    <div class="col-12">
+                    <button id="search" type="button" class="button-green">Find</button>
+                  </div>
+                  </div>
+            </div>
+          </div>
+          <div id="results" class="row card align-items-center top-margin">
+
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <div>
+      <a/>
+    </div>
+    <div>
+      <div>
+        <div/>
+      </div>
+    </div>
+    <div >
+      <a>By Calum Bell</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+$(document).ready(function() {
+
+  $("#search").click(function(e) {
+      e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: "/search",
+        data: {
+          search: $("#searchInput").val()
+        },
+        success: function(result) {
+          let renderString = "";
+          for(let i = 0; i < result.length; ++i) {
+            let noResources = "None";
+            let noTasks = "None";
+            let projectURL = '/projects/' + result[i].record._id;
+
+            if(result[i].resourceObjects != null) {
+              noResources = result[i].resourceObjects.length;
+            }
+            if(result[i].deadlineObjects != null) {
+              noTasks = result[i].deadlineObjects.length;
+            }
+            renderString += `<a href='${projectURL}'><div class="subcard"><h4>${result[i].record.title}</h4><span>Number of Resources: ${noResources}</span></br><span>Number of Deadlines: ${noTasks}</span></div></a>`;
+          }
+
+          document.getElementById("results").innerHTML = renderString;
+          console.log(JSON.stringify(result));
+        },
+        error: function(result) {
+          alert('error');
+        }
+      });
+    });
+  });
+</script>
