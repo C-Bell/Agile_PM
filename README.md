@@ -1,9 +1,9 @@
 # Agile_PM - API Example
-API Example - Build a simple end-to-end project management application with handmade authentication, automated testing using chai/mocha and a RESTful API.
+API Example - A simple end-to-end project management application with handmade authentication, automated testing using chai/mocha and a RESTful API.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-**Application Name:** ForgetMeNot [React].
+**Application Name:** Agile_PM [Node/Handlebars].
 
 **Application Description:** A Node.js/Handlebars app, built with custom authentication, following best practices for RESTful API architecture. This application was built to further explore best practices in web application architecture including utilizing automated tests, different types of security and API design.
 
