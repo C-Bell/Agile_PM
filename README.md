@@ -5,7 +5,7 @@ API Example - A simple end-to-end project management application with handmade a
 
 **Application Name:** Agile_PM [Node/Handlebars].
 
-**Application Description:** A Node.js/Handlebars app, built with custom authentication, following best practices for RESTful API architecture. This application was built to further explore best practices in web application architecture including utilizing automated tests, different types of security and API design.
+**Application Description:** A Node.js/Handlebars app, built with custom authentication, following best practices for RESTful API architecture. This application was built to further explore best practices in web application architecture including utilizing automated tests, different types of authorization and RESTful API design.
 
 **Prefix:** AGILE_API.
 
